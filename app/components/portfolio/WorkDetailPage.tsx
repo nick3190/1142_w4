@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { GridWork } from "@/lib/portfolio-data";
 import { workCoverClass } from "@/lib/portfolio-data";
@@ -24,8 +25,19 @@ export function WorkDetailPage({
         </Link>
         <article className="mt-8 overflow-hidden rounded-2xl border border-zinc-200/80 bg-white/80 shadow-sm dark:border-zinc-800/80 dark:bg-zinc-950/70">
           <div
-            className={`h-48 w-full sm:h-56 ${workCoverClass(work.accent)}`}
-          />
+            className={`relative h-48 w-full overflow-hidden sm:h-56 ${workCoverClass(work.accent)}`}
+          >
+            {work.coverImageUrl ? (
+              <Image
+                src={work.coverImageUrl}
+                alt={work.title}
+                fill
+                className="object-cover object-top"
+                sizes="(max-width: 768px) 100vw, 48rem"
+                priority
+              />
+            ) : null}
+          </div>
           <div className="space-y-4 p-6 sm:p-8">
             <p className="text-xs font-medium uppercase tracking-widest text-zinc-500">
               {categoryLabel} · {work.year}

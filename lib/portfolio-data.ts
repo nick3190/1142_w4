@@ -15,6 +15,9 @@ export type AudioClip = {
 /** 聲噪立方等含中文檔名的公開路徑 */
 export const noiseCubeVideoPath = `/portfolio/noiseCube/${encodeURIComponent("聲噪立方.mov")}`;
 
+/** 統神 T 恤主視覺（含中文檔名） */
+export const wangHongTeeImagePath = `/portfolio/tShirt/${encodeURIComponent("統神T＿第二版-03-03.png")}`;
+
 export type AudioIntroSection = {
   heading: string;
   text: string;
@@ -125,7 +128,7 @@ export const audioTracks: AudioTrack[] = [
     ],
     introSections: [
       {
-        heading: "摘句",
+        heading: "引言",
         text: "「我的家是一座小山丘，山坡上長滿了綠綠的草，\n還有好多像笑臉一樣的向日葵。」\n\n「有一天，好像是因為我，我的山丘裂開了，\n它們越漂越遠、越漂越遠。」\n\n┉",
       },
       {
@@ -271,6 +274,8 @@ export type GridWork = {
   summary: string;
   body: string[];
   accent: Accent;
+  /** 列表卡與詳情頁頂部封面（公開路徑） */
+  coverImageUrl?: string;
 };
 
 export const graphicWorks: GridWork[] = [
@@ -279,7 +284,7 @@ export const graphicWorks: GridWork[] = [
     year: "2023",
     title: "《好食。雞蛋糕》",
     subtitle: "LOGO 主視覺設計",
-    summary: "品牌識別與主視覺發想，應用於包裝與社群素材。",
+    summary: "太醜了不敢放出來，但作品太少所以拿出來佔位。",
     body: [
       "為《好食。雞蛋糕》設計 LOGO 與主視覺系統，延伸應用於攤車識別、社群貼文與簡易印刷物。",
     ],
@@ -290,11 +295,12 @@ export const graphicWorks: GridWork[] = [
     year: "2025",
     title: "網紅 T 恤設計",
     subtitle: "個人創作",
-    summary: "圖像與版型概念，結合社群文化語彙的服飾平面。",
+    summary: "為知名網紅 亞洲統神 設計 T 恤，結合眾多統神金句連發。",
     body: [
-      "個人創作之 T 恤圖像設計，實驗字體、插畫與印刷限制下的視覺趣味。",
+      "為知名網紅 亞洲統神 設計 T 恤，結合眾多統神金句連發。",
     ],
     accent: "rose",
+    coverImageUrl: wangHongTeeImagePath,
   },
 ];
 

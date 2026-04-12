@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { GridWork } from "@/lib/portfolio-data";
 import { workCoverClass } from "@/lib/portfolio-data";
@@ -17,8 +18,17 @@ export function WorkBentoCard({ work, href, className = "" }: WorkBentoCardProps
       <div
         className={`relative aspect-[16/10] w-full overflow-hidden transition duration-500 group-hover:scale-[1.03] ${workCoverClass(work.accent)}`}
       >
+        {work.coverImageUrl ? (
+          <Image
+            src={work.coverImageUrl}
+            alt={work.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 100vw, 50vw"
+          />
+        ) : null}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.35),transparent_55%)] opacity-70 transition duration-500 group-hover:opacity-100 dark:bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.12),transparent_55%)]" />
-        <span className="absolute bottom-3 left-3 rounded-full bg-black/45 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white backdrop-blur-sm">
+        <span className="absolute bottom-3 left-3 z-10 rounded-full bg-black/45 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white backdrop-blur-sm">
           {work.year}
         </span>
       </div>

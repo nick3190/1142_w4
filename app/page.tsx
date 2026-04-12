@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { wangHongTeeImagePath } from "@/lib/portfolio-data";
 
 const SHOWREEL_VIMEO_ID = "1120960224";
 
@@ -13,12 +14,28 @@ const sidebarLinks = [
   { href: "/mixing", title: "混音", desc: "影視後期與收音" },
 ] as const;
 
-const portfolioLinks = [
-  { href: "/audio", title: "配樂與聲音設計", desc: "串流播放介面、曲目與專案介紹" },
-  { href: "/graphic_design", title: "平面設計", desc: "主視覺、識別與版面作品" },
-  { href: "/web_design", title: "網頁設計", desc: "網站與互動網頁專案" },
-  { href: "/device_design", title: "裝置設計", desc: "聲響／新媒體裝置與展場" },
-  { href: "/mixing", title: "混音", desc: "影視後期混音與收音" },
+const featuredWorks = [
+  {
+    title: "他在他方",
+    subtitle: "C-LAB 聲響藝術節 VR 劇場",
+    href: "/audio?slug=ta-zai-ta-fang&autoplay=1",
+    imageSrc: "https://i.ytimg.com/vi/Sdb2TiOQjPY/hqdefault.jpg",
+    remote: true,
+  },
+  {
+    title: "網紅 T 恤設計",
+    subtitle: "平面設計 · 亞洲統神主題",
+    href: "/graphic_design/wang-hong-tee",
+    imageSrc: wangHongTeeImagePath,
+    remote: false,
+  },
+  {
+    title: "狗與嬰兒",
+    subtitle: "短片配樂",
+    href: "/audio?slug=gou-yu-ying-er&autoplay=1",
+    imageSrc: "/featured/gou-yu-ying-er.jpg",
+    remote: false,
+  },
 ] as const;
 
 export default function Home() {
@@ -143,8 +160,8 @@ export default function Home() {
             </section>
 
             <section
-              id="portfolio"
-              className="relative mt-2 min-h-[380px] overflow-hidden rounded-3xl border border-zinc-200/60 shadow-lg dark:border-zinc-700/60"
+              id="featured"
+              className="relative mt-2 min-h-[320px] overflow-hidden rounded-3xl border border-zinc-200/60 shadow-lg dark:border-zinc-700/60"
             >
               <div
                 className="absolute inset-0 bg-cover bg-center"
@@ -155,24 +172,44 @@ export default function Home() {
               <div className="relative z-10 flex flex-col gap-6 p-6 sm:p-8 lg:p-10">
                 <header>
                   <p className="text-xs font-semibold uppercase tracking-widest text-white/70">
-                    Portfolio
+                    Featured
                   </p>
                   <h2 className="mt-2 text-xl font-semibold text-white sm:text-2xl">
-                    作品集
+                    精選作品
                   </h2>
                 </header>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                  {portfolioLinks.map((item) => (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {featuredWorks.map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="rounded-2xl border border-white/25 bg-white/15 p-5 shadow-lg backdrop-blur-xl hover:border-white/40 hover:bg-white/25"
+                      className="group relative block overflow-hidden rounded-2xl border border-white/20 bg-zinc-900/40 shadow-xl ring-1 ring-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
                     >
-                      <h3 className="text-base font-semibold text-white underline-offset-2 hover:underline">
-                        {item.title}
-                      </h3>
-                      <p className="mt-2 text-sm text-white/85">{item.desc}</p>
-                      <p className="mt-4 text-xs text-white/90">前往 →</p>
+                      <div className="relative aspect-[4/3] w-full overflow-hidden">
+                        <Image
+                          src={item.imageSrc}
+                          alt=""
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="object-cover transition duration-300 ease-out group-hover:scale-[1.03] group-hover:blur-sm motion-reduce:group-hover:blur-none"
+                          unoptimized={item.remote}
+                        />
+                        <div
+                          className="absolute inset-0 bg-black/0 transition duration-300 group-hover:bg-black/35 group-active:bg-black/30"
+                          aria-hidden
+                        />
+                        <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
+                          <span className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-zinc-900 shadow-lg">
+                            點擊觀看
+                          </span>
+                        </div>
+                      </div>
+                      <div className="border-t border-white/10 bg-black/25 px-4 py-3 backdrop-blur-md">
+                        <h3 className="text-base font-semibold text-white">
+                          {item.title}
+                        </h3>
+                        <p className="mt-1 text-xs text-white/80">{item.subtitle}</p>
+                      </div>
                     </Link>
                   ))}
                 </div>
