@@ -37,7 +37,7 @@ export default function RootLayout({
         <div className="flex-1">{children}</div>
         <footer className="border-t border-zinc-200/80 bg-zinc-100/90 py-6 text-center text-xs text-zinc-500 dark:border-zinc-800/80 dark:bg-zinc-950/90 dark:text-zinc-400">
           <p>
-            uniqueee3190@gmail.com · 0908700909
+            uniqueee3190@gmail.com · Welcome Georgie
           </p>
           <p className="mt-1">© {new Date().getFullYear()} Nick Hsu</p>
         </footer>

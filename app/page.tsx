@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import { GeorgieHero } from "@/app/components/home/GeorgieHero";
+import { getGeorgieFinalePath, getGeorgieRandomPool } from "@/lib/georgie-images";
 import { wangHongTeeImagePath } from "@/lib/portfolio-data";
 
 const SHOWREEL_VIMEO_ID = "1120960224";
@@ -39,6 +41,9 @@ const featuredWorks = [
 ] as const;
 
 export default function Home() {
+  const georgiePoolPaths = getGeorgieRandomPool();
+  const georgieFinalePath = getGeorgieFinalePath();
+
   return (
     <main className="min-h-full">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
@@ -103,35 +108,10 @@ export default function Home() {
 
           <div className="order-1 space-y-6 lg:order-2 lg:ml-[300px]">
             <section className="rounded-3xl border border-zinc-200/80 bg-white/90 p-8 shadow-sm dark:border-zinc-800/80 dark:bg-zinc-950/80 sm:p-10 lg:p-12">
-              <div className="flex flex-col items-center text-center">
-                <Image
-                  src="/self_pic.png"
-                  alt=""
-                  width={160}
-                  height={160}
-                  className="h-32 w-32 rounded-full object-cover ring-4 ring-white shadow-md dark:ring-zinc-800 sm:h-40 sm:w-40"
-                />
-                <h1 className="mt-8 text-2xl font-semibold text-zinc-900 dark:text-zinc-50 sm:text-3xl">
-                  歡迎來到 Nick Hsu 的個人網站
-                </h1>
-                <p className="mt-3 max-w-md text-sm text-zinc-600 dark:text-zinc-300">
-                  23 歲，創作遊走於聲響、音樂與電影之間。
-                </p>
-                <div className="mt-8 flex flex-wrap justify-center gap-3">
-                  <Link
-                    href="#showreel"
-                    className="rounded-full bg-violet-600 px-8 py-2.5 text-sm font-semibold text-white hover:bg-violet-500 dark:bg-violet-500 dark:hover:bg-violet-400"
-                  >
-                    開始探索
-                  </Link>
-                  <Link
-                    href="/about_me"
-                    className="rounded-full border border-zinc-300 px-5 py-2.5 text-sm font-medium text-zinc-800 hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-100 dark:hover:bg-zinc-800"
-                  >
-                    關於我
-                  </Link>
-                </div>
-              </div>
+              <GeorgieHero
+                georgiePoolPaths={georgiePoolPaths}
+                finalePath={georgieFinalePath}
+              />
 
               <section id="showreel" className="mt-10 text-left">
                 <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">

@@ -27,7 +27,7 @@ const projectRoles: Role[] = [
     detail: "參與《顯影用液》與《PM3000》之聲音設計，創作 VR 裝置之實驗性音樂。",
   },
   {
-    org: "李國鼎科藝獎",
+    org: "《繞圈，一個漂浮世界》- 李國鼎科藝獎",
     role: "聲音設計",
     period: "2024.12",
     detail:

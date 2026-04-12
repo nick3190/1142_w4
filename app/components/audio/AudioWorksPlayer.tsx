@@ -167,13 +167,13 @@ export function AudioWorksPlayer({
   const sound = useMemo(() => tracks.filter((t) => t.kind === "聲音設計"), [tracks]);
 
   return (
-    <div className="grid h-full min-h-0 w-full grid-rows-[minmax(0,26vh)_auto_minmax(0,24vh)] gap-2 sm:gap-3 lg:grid-cols-[minmax(0,200px)_minmax(0,1fr)_minmax(0,150px)] lg:grid-rows-1 lg:items-stretch xl:grid-cols-[minmax(0,220px)_minmax(0,1fr)_minmax(0,170px)]">
-      <aside className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-zinc-200/90 bg-white/95 shadow-md dark:border-zinc-800 dark:bg-zinc-900/95">
-        <div className="shrink-0 border-b border-zinc-200 px-3 py-2 dark:border-zinc-800">
-          <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+    <div className="grid h-full min-h-0 w-full grid-rows-[minmax(0,22vh)_auto_minmax(0,20vh)] gap-1.5 sm:gap-2 lg:grid-cols-[minmax(0,15fr)_minmax(0,45fr)_minmax(0,25fr)] lg:grid-rows-1 lg:items-stretch lg:gap-3">
+      <aside className="flex min-h-0 flex-col overflow-hidden rounded-xl border border-zinc-200/90 bg-white/95 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/95">
+        <div className="shrink-0 border-b border-zinc-200 px-2 py-1 dark:border-zinc-800">
+          <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-zinc-500">
             Queue
           </p>
-          <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+          <p className="text-[11px] font-semibold text-zinc-900 dark:text-zinc-100">
             播放清單
           </p>
         </div>
@@ -215,8 +215,8 @@ export function AudioWorksPlayer({
         />
       </div>
 
-      <aside className="min-h-0 min-w-0 overflow-y-auto overscroll-contain rounded-2xl border border-zinc-200/90 bg-white/95 p-3 shadow-md dark:border-zinc-800 dark:bg-zinc-900/95 sm:p-3.5">
-        <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-zinc-500">
+      <aside className="min-h-0 min-w-0 overflow-y-auto overscroll-contain rounded-xl border border-zinc-200/90 bg-white/95 p-2 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/95 sm:p-2.5">
+        <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-zinc-500">
           About
         </p>
         <h3 className="mt-1 text-sm font-semibold leading-snug text-zinc-900 dark:text-zinc-50">
@@ -295,59 +295,53 @@ function PlaylistGroup({
           return (
             <div
               key={work.slug}
-              className="mb-1.5 rounded-lg border border-zinc-200/80 bg-zinc-50/80 dark:border-zinc-800 dark:bg-zinc-950/40"
+              className="mb-1 rounded-lg border border-zinc-200/80 bg-zinc-50/80 dark:border-zinc-800 dark:bg-zinc-950/40"
             >
-              <button
-                type="button"
-                onClick={() => onPlayWorkFirst(work.slug)}
-                className="flex w-full items-center gap-2 px-2 py-2 text-left text-[11px] font-semibold text-zinc-800 transition hover:bg-zinc-100/90 dark:text-zinc-200 dark:hover:bg-zinc-800/60"
-              >
-                <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-zinc-200 text-[9px] text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300">
-                  ♪
-                </span>
-                <span className="min-w-0 flex-1 leading-snug">{work.title}</span>
-              </button>
-              <ul className="space-y-0.5 border-t border-zinc-200/70 px-1 pb-1.5 pt-1 dark:border-zinc-800/80">
-                {clips.map((clip) => {
-                  const qi = queue.findIndex(
-                    (q) =>
-                      q.work.slug === work.slug && q.clip.label === clip.label,
-                  );
-                  const active = qi === flatIndex;
-                  const playable = Boolean(clip.url || clip.youtubeUrl);
-                  return (
-                    <li
-                      key={`${work.slug}-${clip.label}-${clip.url ?? ""}-${clip.youtubeUrl ?? ""}`}
+              {clips.map((clip) => {
+                const qi = queue.findIndex(
+                  (q) =>
+                    q.work.slug === work.slug && q.clip.label === clip.label,
+                );
+                const active = qi === flatIndex;
+                const playable = Boolean(clip.url || clip.youtubeUrl);
+                return (
+                  <button
+                    key={`${work.slug}-${clip.label}-${clip.url ?? ""}-${clip.youtubeUrl ?? ""}`}
+                    type="button"
+                    disabled={qi < 0}
+                    onClick={() => onPickClip(qi)}
+                    className={`flex w-full items-start gap-2 px-2 py-2 text-left transition ${
+                      active
+                        ? "bg-violet-600 text-white shadow-sm dark:bg-violet-500"
+                        : playable
+                          ? "text-zinc-800 hover:bg-zinc-100/90 dark:text-zinc-200 dark:hover:bg-zinc-800/60"
+                          : "cursor-not-allowed text-zinc-400 dark:text-zinc-500"
+                    }`}
+                  >
+                    <span
+                      className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[9px] font-bold ${
+                        active
+                          ? "bg-white/20 text-white"
+                          : "bg-zinc-200 text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300"
+                      }`}
                     >
-                      <button
-                        type="button"
-                        disabled={qi < 0}
-                        onClick={() => onPickClip(qi)}
-                        className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[11px] transition ${
-                          active
-                            ? "bg-violet-600 text-white shadow-sm dark:bg-violet-500"
-                            : playable
-                              ? "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
-                              : "cursor-not-allowed text-zinc-400 dark:text-zinc-500"
-                        }`}
+                      {playable ? "♪" : "—"}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span
+                        className={`block text-[11px] font-semibold leading-snug ${active ? "text-white" : ""}`}
                       >
-                        <span
-                          className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[9px] font-bold ${
-                            active
-                              ? "bg-white/20 text-white"
-                              : "bg-zinc-200 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400"
-                          }`}
-                        >
-                          {playable ? "♪" : "—"}
-                        </span>
-                        <span className="min-w-0 flex-1 truncate font-medium">
-                          {clip.label}
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
+                        {work.title}
+                      </span>
+                      <span
+                        className={`mt-0.5 block text-[10px] leading-snug ${active ? "text-white/90" : "text-zinc-500 dark:text-zinc-400"}`}
+                      >
+                        {clip.label}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           );
         }
@@ -613,12 +607,12 @@ function PlaybackDeck({
       : embedBase;
 
   const squareStyle = {
-    width: "min(260px, min(calc(100vw - 2rem), calc(100dvh - 15rem)))",
-    height: "min(260px, min(calc(100vw - 2rem), calc(100dvh - 15rem)))",
+    width: "min(380px, min(92%, calc(100dvh - 11rem)))",
+    height: "min(380px, min(92%, calc(100dvh - 11rem)))",
   } as const;
 
   return (
-    <section className="flex h-full max-h-full w-full max-w-[340px] flex-col justify-between overflow-hidden rounded-2xl border border-zinc-700/80 bg-gradient-to-b from-zinc-900 via-zinc-900 to-zinc-950 px-3 py-3 text-zinc-100 shadow-xl sm:max-w-[360px] sm:px-4 sm:py-4">
+    <section className="flex h-full max-h-full w-full max-w-[min(100%,520px)] flex-col justify-between overflow-hidden rounded-xl border border-zinc-700/80 bg-gradient-to-b from-zinc-900 via-zinc-900 to-zinc-950 px-2.5 py-2.5 text-zinc-100 shadow-md sm:px-3 sm:py-3">
       {mode === "cover-audio" || mode === "audio" ? (
         <audio
           ref={audioRef}
@@ -769,7 +763,7 @@ function PlaybackDeck({
             type="button"
             onClick={onPrev}
             disabled={flatIndex <= 0}
-            className="rounded-full border border-zinc-600 px-3 py-1.5 text-[10px] font-medium text-zinc-200 hover:bg-zinc-800 disabled:opacity-30 sm:px-4 sm:py-2 sm:text-xs"
+            className="rounded-full border border-zinc-600 px-2.5 py-1.5 text-[10px] font-medium text-zinc-200 hover:bg-zinc-800 disabled:opacity-30 sm:px-3.5 sm:text-xs"
           >
             上一段
           </button>
@@ -777,7 +771,7 @@ function PlaybackDeck({
             type="button"
             onClick={togglePlay}
             disabled={!canPlayLocal}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-base font-bold text-zinc-900 shadow-lg hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-35 sm:h-12 sm:w-12 sm:text-lg"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-sm font-bold text-zinc-900 shadow-md hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-35 sm:h-11 sm:w-11 sm:text-base"
             aria-label={isPlaying ? "暫停" : "播放"}
           >
             {isPlaying ? "❚❚" : "▶"}
@@ -786,7 +780,7 @@ function PlaybackDeck({
             type="button"
             onClick={onNext}
             disabled={flatIndex >= queueLength - 1}
-            className="rounded-full border border-zinc-600 px-3 py-1.5 text-[10px] font-medium text-zinc-200 hover:bg-zinc-800 disabled:opacity-30 sm:px-4 sm:py-2 sm:text-xs"
+            className="rounded-full border border-zinc-600 px-2.5 py-1.5 text-[10px] font-medium text-zinc-200 hover:bg-zinc-800 disabled:opacity-30 sm:px-3.5 sm:text-xs"
           >
             下一段
           </button>
