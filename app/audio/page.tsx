@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function AudioPage() {
   return (
     <main className="min-h-full">
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+      <div className="mx-auto max-w-[90rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
         <header className="mb-8 max-w-2xl">
           <p className="text-xs font-semibold uppercase tracking-widest text-violet-600 dark:text-violet-400">
             Portfolio
