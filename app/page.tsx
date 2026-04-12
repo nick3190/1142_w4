@@ -1,6 +1,7 @@
 import Link from "next/link";
 
-const youtubeId = process.env.NEXT_PUBLIC_SHOWREEL_YOUTUBE_ID?.trim();
+/** Showreel：Vimeo 影片（與網址 https://vimeo.com/1120960224 對應） */
+const SHOWREEL_VIMEO_ID = "1120960224";
 
 const sidebarLinks = [
   { href: "/about_me", title: "關於我", desc: "學歷、專長與語言" },
@@ -124,27 +125,27 @@ export default function Home() {
                   Showreel
                 </h2>
                 <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                  精選影音縮影（YouTube 影片 ID 見環境變數說明）。
+                  精選影音縮影（Vimeo 嵌入）。
                 </p>
                 <div className="mt-4 aspect-video w-full overflow-hidden rounded-2xl border border-zinc-200/80 bg-zinc-100 dark:border-zinc-800/80 dark:bg-zinc-900/80">
-                  {youtubeId ? (
-                    <iframe
-                      title="Showreel"
-                      src={`https://www.youtube.com/embed/${youtubeId}`}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                      className="h-full w-full"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center px-4 text-center text-sm text-zinc-500 dark:text-zinc-400">
-                      設定{" "}
-                      <code className="mx-1 rounded bg-zinc-200 px-1 text-xs dark:bg-zinc-800">
-                        NEXT_PUBLIC_SHOWREEL_YOUTUBE_ID
-                      </code>{" "}
-                      後會顯示嵌入影片。
-                    </div>
-                  )}
+                  <iframe
+                    title="Showreel"
+                    src={`https://player.vimeo.com/video/${SHOWREEL_VIMEO_ID}`}
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowFullScreen
+                    className="h-full w-full"
+                  />
                 </div>
+                <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+                  <a
+                    href="https://vimeo.com/1120960224?fl=ip&fe=ec"
+                    className="text-violet-600 underline hover:text-violet-500 dark:text-violet-400"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    在 Vimeo 開啟此影片
+                  </a>
+                </p>
               </section>
             </section>
 

@@ -1,4 +1,4 @@
-/** 履歷與作品資料（依 202604.pdf 整理，音檔網址可日後補上） */
+/** 履歷與作品資料。配樂音檔對應 public/portfolio/ 內檔案（每首一檔代表預覽）。 */
 
 export type AudioTrack = {
   slug: string;
@@ -8,7 +8,7 @@ export type AudioTrack = {
   subtitle?: string;
   /** 右欄專案介紹 */
   description: string;
-  /** 可選：公開音檔 URL，未設定時播放器僅顯示介面 */
+  /** 音檔 URL（站內為 /portfolio/... ） */
   audioUrl?: string;
 };
 
@@ -20,6 +20,7 @@ export const audioTracks: AudioTrack[] = [
     title: "短片《方死方生》",
     description:
       "為短片譜寫配樂，以聲響層次支撐敘事節奏。可於此補充創作概念、合作導演與製作團隊、使用樂器或取樣來源等。",
+    audioUrl: "/portfolio/FSFS/FSFS_1_FINAL.wav",
   },
   {
     slug: "mossaic",
@@ -28,6 +29,7 @@ export const audioTracks: AudioTrack[] = [
     title: "遊戲《MOSSAIC》",
     description:
       "遊戲配樂與互動情境聲響設計，強調循環與拼貼感。可補充引擎、合作單位與試玩連結。",
+    audioUrl: "/portfolio/mossaic/Moist_Dream.wav",
   },
   {
     slug: "a-story-of",
@@ -36,6 +38,7 @@ export const audioTracks: AudioTrack[] = [
     title: "金勇短片《A story of...》",
     description:
       "短片配樂製作，依影像調性安排主題動機與配器。可補充影展放映與串流連結。",
+    audioUrl: "/portfolio/aStoryOf/1.wav",
   },
   {
     slug: "wo-de-dao",
@@ -44,6 +47,7 @@ export const audioTracks: AudioTrack[] = [
     title: "短片《我的島》",
     description:
       "短片配樂。可補充故事背景、導演合作與聲音方向關鍵字。",
+    audioUrl: "/portfolio/my_island/island_1.wav",
   },
   {
     slug: "gou-yu-ying-er",
@@ -52,6 +56,7 @@ export const audioTracks: AudioTrack[] = [
     title: "短片《狗與嬰兒》",
     description:
       "短片配樂。可補充配樂與對白、環境聲之間的平衡與混音策略。",
+    audioUrl: "/portfolio/DogNBaby/dogshit_1_final.wav",
   },
   {
     slug: "qi-yi-huan-meng",
@@ -60,14 +65,7 @@ export const audioTracks: AudioTrack[] = [
     title: "傳院影展《奇疫幻夢》展場配樂",
     description:
       "展場空間配樂，配合影像裝置與觀展動線。可補充展期、策展單位與空間聲學考量。",
-  },
-  {
-    slug: "tu-zi-dong",
-    year: "2022",
-    kind: "配樂",
-    title: "肯園繪本展《兔子洞》沉浸繪本配樂",
-    description:
-      "沉浸繪本體驗之配樂與聲景，引導觀眾進入敘事空間。可補充與視覺、朗讀節奏的配合方式。",
+    audioUrl: "/portfolio/IllnessDream/IllnessDream.mp3",
   },
   {
     slug: "rao-quan-piao-fu",
