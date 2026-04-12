@@ -12,7 +12,7 @@ export default function AboutMePage() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-12 md:gap-5">
           <BentoCard className="md:col-span-7" eyebrow="關於我" title="許兆豐｜Nick Hsu">
             <p>
-              22 歲，創作遊走於聲響、音樂與電影之間，投身於展覽工作，持續尋找更多發展的機會。
+              23 歲，創作遊走於聲響、音樂與電影之間。
             </p>
             <p className="mt-4">
               專長涵蓋混音、編曲、影視配樂、聲音設計、平面設計與互動程式設計，並熟悉影音剪輯與常見設計／聲音軟體流程。
@@ -20,10 +20,13 @@ export default function AboutMePage() {
           </BentoCard>
 
           <BentoCard className="md:col-span-5" eyebrow="學歷" title="國立政治大學">
-            <p className="font-medium text-zinc-800 dark:text-zinc-100">
+            <p className="text-xs text-zinc-500">
+            （2021 - ）
+            </p>
+            <p className="mt-1 text-xs text-zinc-500">
               廣播電視學系
             </p>
-            <p className="mt-1 text-xs text-zinc-500">數位內容與科技學程 · 2021 至今</p>
+            <p className="mt-1 text-xs text-zinc-500">數位內容與科技學程</p>
           </BentoCard>
 
           <BentoCard className="md:col-span-6" eyebrow="技能" title="軟體與技術">

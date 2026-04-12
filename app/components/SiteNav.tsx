@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const links = [
   { href: "/", label: "首頁" },
@@ -12,6 +15,11 @@ const links = [
 ] as const;
 
 export function SiteNav() {
+  const pathname = usePathname();
+  if (pathname === "/") {
+    return null;
+  }
+
   return (
     <header className="sticky top-0 z-40 border-b border-zinc-200/80 bg-zinc-100/85 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/85">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">

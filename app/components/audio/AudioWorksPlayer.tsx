@@ -100,18 +100,6 @@ function PlaybackDeck({
   useEffect(() => {
     const el = audioRef.current;
     if (!el) return;
-    el.pause();
-    if (track.audioUrl) {
-      el.src = track.audioUrl;
-    } else {
-      el.removeAttribute("src");
-    }
-    el.load();
-  }, [track.audioUrl, track.slug]);
-
-  useEffect(() => {
-    const el = audioRef.current;
-    if (!el) return;
     const onTime = () => {
       setProgress(el.currentTime);
       setDuration(el.duration || 0);
@@ -125,7 +113,7 @@ function PlaybackDeck({
       el.removeEventListener("loadedmetadata", onTime);
       el.removeEventListener("ended", onEnded);
     };
-  }, [track.slug]);
+  }, [track.slug, track.audioUrl]);
 
   const togglePlay = async () => {
     const el = audioRef.current;
@@ -148,7 +136,15 @@ function PlaybackDeck({
 
   return (
     <section className="flex flex-col justify-between gap-6 rounded-2xl border border-zinc-200/80 bg-white/90 p-6 dark:border-zinc-800/80 dark:bg-zinc-950/80 lg:col-span-5 lg:rounded-none lg:border-0 lg:border-r lg:px-8 lg:py-10">
-      <audio ref={audioRef} preload="metadata" />
+      {track.audioUrl ? (
+        <audio
+          ref={audioRef}
+          src={track.audioUrl}
+          preload="metadata"
+          // 音檔網址若錯誤或回 404，僅在主控台提示，不阻斷頁面
+          onError={() => setIsPlaying(false)}
+        />
+      ) : null}
       <div>
         <p className="text-xs font-medium uppercase tracking-widest text-violet-600 dark:text-violet-400">
           正在瀏覽
