@@ -24,10 +24,7 @@ export function WorkBentoCard({ work, href, className = "" }: WorkBentoCardProps
       </div>
       <div className="flex flex-1 flex-col gap-2 p-5">
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
-            點擊查看
-          </p>
-          <h2 className="mt-1 text-base font-semibold tracking-tight text-zinc-900 transition group-hover:text-violet-700 dark:text-zinc-50 dark:group-hover:text-violet-300">
+          <h2 className="text-base font-semibold tracking-tight text-zinc-900 transition group-hover:text-violet-700 dark:text-zinc-50 dark:group-hover:text-violet-300">
             {work.title}
           </h2>
           {work.subtitle && (

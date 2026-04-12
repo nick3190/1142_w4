@@ -17,9 +17,6 @@ export default function MixingPage() {
           <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
             混音
           </h1>
-          <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-300">
-            影視後期混音與收音作品；點擊卡片查看專案說明。
-          </p>
         </header>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {mixingWorks.map((work) => (

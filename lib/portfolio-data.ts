@@ -1,4 +1,7 @@
-/** 履歷與作品資料。配樂音檔對應 public/portfolio/ 內檔案（每首一檔代表預覽）。 */
+export type AudioClip = {
+  label: string;
+  url: string;
+};
 
 export type AudioTrack = {
   slug: string;
@@ -6,10 +9,8 @@ export type AudioTrack = {
   kind: "配樂" | "聲音設計";
   title: string;
   subtitle?: string;
-  /** 右欄專案介紹 */
   description: string;
-  /** 音檔 URL（站內為 /portfolio/... ） */
-  audioUrl?: string;
+  clips?: AudioClip[];
 };
 
 export const audioTracks: AudioTrack[] = [
@@ -18,54 +19,76 @@ export const audioTracks: AudioTrack[] = [
     year: "2025",
     kind: "配樂",
     title: "短片《方死方生》",
-    description:
-      "為短片譜寫配樂，以聲響層次支撐敘事節奏。可於此補充創作概念、合作導演與製作團隊、使用樂器或取樣來源等。",
-    audioUrl: "/portfolio/FSFS/FSFS_1_FINAL.wav",
+    description: "為短片譜寫配樂，以聲響層次支撐敘事節奏。",
+    clips: [
+      { label: "FSFS 1", url: "/portfolio/FSFS/FSFS_1_FINAL.mp3" },
+      { label: "FSFS 2", url: "/portfolio/FSFS/FSFS_2_FINAL.mp3" },
+      { label: "FSFS 3", url: "/portfolio/FSFS/FSFS_3_FINAL.mp3" },
+    ],
   },
   {
     slug: "mossaic",
     year: "2025",
     kind: "配樂",
     title: "遊戲《MOSSAIC》",
-    description:
-      "遊戲配樂與互動情境聲響設計，強調循環與拼貼感。可補充引擎、合作單位與試玩連結。",
-    audioUrl: "/portfolio/mossaic/Moist_Dream.wav",
+    description: "遊戲配樂與互動情境聲響設計，強調循環與拼貼感。",
+    clips: [
+      { label: "Moist Dream", url: "/portfolio/mossaic/Moist_Dream.mp3" },
+      { label: "Scorched Trail", url: "/portfolio/mossaic/Schorched_Trail.mp3" },
+    ],
   },
   {
     slug: "a-story-of",
     year: "2023",
     kind: "配樂",
     title: "金勇短片《A story of...》",
-    description:
-      "短片配樂製作，依影像調性安排主題動機與配器。可補充影展放映與串流連結。",
-    audioUrl: "/portfolio/aStoryOf/1.wav",
+    description: "短片配樂製作，依影像調性安排主題動機與配器。",
+    clips: [
+      { label: "Cue 1", url: "/portfolio/aStoryOf/1.mp3" },
+      { label: "Cue 2", url: "/portfolio/aStoryOf/2.mp3" },
+      { label: "Cue 3", url: "/portfolio/aStoryOf/3.mp3" },
+      { label: "Cue 4", url: "/portfolio/aStoryOf/4.mp3" },
+      { label: "Cue 5", url: "/portfolio/aStoryOf/5.mp3" },
+      { label: "Ending", url: "/portfolio/aStoryOf/ending.mp3" },
+    ],
   },
   {
     slug: "wo-de-dao",
     year: "2026",
     kind: "配樂",
     title: "短片《我的島》",
-    description:
-      "短片配樂。可補充故事背景、導演合作與聲音方向關鍵字。",
-    audioUrl: "/portfolio/my_island/island_1.wav",
+    description: "短片配樂。",
+    clips: [
+      { label: "Island 1", url: "/portfolio/my_island/island_1.mp3" },
+      { label: "Island 2", url: "/portfolio/my_island/island_2.mp3" },
+      { label: "Island 3", url: "/portfolio/my_island/island_3.mp3" },
+      { label: "Island 4", url: "/portfolio/my_island/island_4.mp3" },
+      { label: "Island 5", url: "/portfolio/my_island/island_5.mp3" },
+      { label: "Island 6", url: "/portfolio/my_island/island_6.mp3" },
+    ],
   },
   {
     slug: "gou-yu-ying-er",
     year: "2026",
     kind: "配樂",
     title: "短片《狗與嬰兒》",
-    description:
-      "短片配樂。可補充配樂與對白、環境聲之間的平衡與混音策略。",
-    audioUrl: "/portfolio/DogNBaby/dogshit_1_final.wav",
+    description: "短片配樂。",
+    clips: [
+      { label: "Dog & Baby 1", url: "/portfolio/DogNBaby/dogshit_1_final.mp3" },
+      { label: "Dog & Baby 2", url: "/portfolio/DogNBaby/dogshit_2_final.mp3" },
+      { label: "Dog & Baby 3", url: "/portfolio/DogNBaby/dogshit_3_final.mp3" },
+      { label: "Dog & Baby 4", url: "/portfolio/DogNBaby/dogshit_4_final.mp3" },
+    ],
   },
   {
     slug: "qi-yi-huan-meng",
     year: "2022",
     kind: "配樂",
     title: "傳院影展《奇疫幻夢》展場配樂",
-    description:
-      "展場空間配樂，配合影像裝置與觀展動線。可補充展期、策展單位與空間聲學考量。",
-    audioUrl: "/portfolio/IllnessDream/IllnessDream.mp3",
+    description: "展場空間配樂，配合影像裝置與觀展動線。",
+    clips: [
+      { label: "Illness Dream", url: "/portfolio/IllnessDream/20220414-2.mp3" },
+    ],
   },
   {
     slug: "rao-quan-piao-fu",
@@ -74,39 +97,35 @@ export const audioTracks: AudioTrack[] = [
     title: "投影裝置《繞圈，一個漂浮世界》",
     subtitle: "李國鼎科藝獎 銀賞",
     description:
-      "投影與空間聲響結合之聲音設計，處理觀眾移動時的聲場變化與材質感。可補充技術架構（喇叭配置、播放系統）與創作發想。",
+      "投影與空間聲響結合之聲音設計，處理觀眾移動時的聲場變化與材質感。",
   },
   {
     slug: "ta-zai-ta-fang",
     year: "2025",
     kind: "聲音設計",
     title: "C-LAB 聲響藝術節 VR 劇場《他在他方》",
-    description:
-      "VR 劇場聲音設計，著重雙耳空間感與戲劇張力。可補充與導演／技術團隊分工與版本迭代。",
+    description: "VR 劇場聲音設計，著重雙耳空間感與戲劇張力。",
   },
   {
     slug: "xian-ying-yong-ye",
     year: "2025",
     kind: "聲音設計",
     title: "國科會媽祖繞月科藝展 VR《顯影用液》",
-    description:
-      "科藝展 VR 裝置聲音設計，可補充科學敘事如何轉譯為聽覺隱喻與互動觸發。",
+    description: "科藝展 VR 裝置聲音設計。",
   },
   {
     slug: "pm3000",
     year: "2025",
     kind: "聲音設計",
     title: "國科會媽祖繞月科藝展 VR《PM3000》",
-    description:
-      "同一科藝展系列之 VR 聲音設計，可補充與《顯影用液》在聲音母題上的對照或延續。",
+    description: "同一科藝展系列之 VR 聲音設計。",
   },
   {
     slug: "sheng-zao-li-fang",
     year: "2024",
     kind: "聲音設計",
     title: "《聲噪立方》實驗噪音聲光演出",
-    description:
-      "現場聲光演出之聲音設計與即時性處理。可補充器材、演出場地與與視覺同步方式。",
+    description: "現場聲光演出之聲音設計與即時性處理。",
   },
 ];
 
@@ -135,7 +154,6 @@ export const graphicWorks: GridWork[] = [
     summary: "品牌識別與主視覺發想，應用於包裝與社群素材。",
     body: [
       "為《好食。雞蛋糕》設計 LOGO 與主視覺系統，延伸應用於攤車識別、社群貼文與簡易印刷物。",
-      "可在此補充色彩規範、字體選用、與客戶溝通迭代過程，或連結至 Behance／PDF。",
     ],
     accent: "amber",
   },
@@ -147,7 +165,6 @@ export const graphicWorks: GridWork[] = [
     summary: "圖像與版型概念，結合社群文化語彙的服飾平面。",
     body: [
       "個人創作之 T 恤圖像設計，實驗字體、插畫與印刷限制下的視覺趣味。",
-      "可補充靈感來源、實體打樣照片與販售／贈送管道。",
     ],
     accent: "rose",
   },
@@ -169,13 +186,10 @@ export const webWorks: GridWork[] = [
   {
     slug: "digital-showcase",
     year: "2024",
-    title: "數位展示互動網頁（範例）",
+    title: "數位展示互動網頁",
     subtitle: "HTML · CSS · JavaScript",
-    summary: "可替換為實際接案或課程專案之外連與截圖。",
-    body: [
-      "PDF 未單獨列出網頁專案名稱，此為結構保留欄位，請將標題、技術棧與說明改成你的真實案例。",
-      "建議附上線上連結、GitHub、或使用情境（展場導覽、活動報名頁等）。",
-    ],
+    summary: "互動網頁與數位展示。",
+    body: ["HTML、CSS、JavaScript。"],
     accent: "cyan",
   },
 ];
@@ -189,7 +203,6 @@ export const deviceWorks: GridWork[] = [
     summary: "展場聲響裝置與空間體驗，含發想與展務執行。",
     body: [
       "DCT 華山園區特展作品，負責作品發想設計與執行，並擔任展務人員。",
-      "可補充聲音素材來源、喇叭與感測配置、觀眾動線與技術文件連結。",
     ],
     accent: "emerald",
   },
@@ -199,9 +212,7 @@ export const deviceWorks: GridWork[] = [
     title: "《巢——潮》",
     subtitle: "聲響裝置",
     summary: "以聲響與空間材質探索潮汐與巢居意象。",
-    body: [
-      "聲響裝置創作，可補充展出場地、合作者、錄音／播放系統與觀眾互動機制。",
-    ],
+    body: ["聲響裝置創作。"],
     accent: "sky",
   },
 ];
@@ -213,9 +224,7 @@ export const mixingWorks: GridWork[] = [
     title: "《歡店 Madness》",
     subtitle: "文學院工作坊開幕片 · 後期混音",
     summary: "開幕短片之後期混音與聲音整理。",
-    body: [
-      "文學院工作坊開幕片《歡店 Madness》後期混音，可補充對白編修、環境聲層次與母帶交付格式。",
-    ],
+    body: ["文學院工作坊開幕片《歡店 Madness》後期混音。"],
     accent: "violet",
   },
   {
@@ -224,9 +233,7 @@ export const mixingWorks: GridWork[] = [
     title: "《小犬》",
     subtitle: "金勇影展入圍片 · 收音／後期混音",
     summary: "劇情短片收音與後期混音。",
-    body: [
-      "金勇影展入圍片《小犬》收音與後期混音，可補充現場收音挑戰、與導演在聲音情緒上的討論。",
-    ],
+    body: ["金勇影展入圍片《小犬》收音與後期混音。"],
     accent: "cyan",
   },
 ];

@@ -17,9 +17,6 @@ export default function GraphicDesignPage() {
           <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
             平面設計
           </h1>
-          <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-300">
-            游標懸停於卡片時會有動畫回饋；點擊卡片可開啟作品介紹頁。
-          </p>
         </header>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {graphicWorks.map((work) => (

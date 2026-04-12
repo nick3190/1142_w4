@@ -17,9 +17,6 @@ export default function WebDesignPage() {
           <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
             網頁設計
           </h1>
-          <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-300">
-            與平面、裝置、混音區塊相同：Bento 卡片＋hover 動畫，點擊進入作品頁。
-          </p>
         </header>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {webWorks.map((work) => (

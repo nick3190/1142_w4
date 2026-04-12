@@ -1,6 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
 
-/** Showreel：Vimeo 影片（與網址 https://vimeo.com/1120960224 對應） */
 const SHOWREEL_VIMEO_ID = "1120960224";
 
 const sidebarLinks = [
@@ -25,14 +25,12 @@ export default function Home() {
   return (
     <main className="min-h-full">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)] lg:items-start lg:gap-8">
-          {/* 左欄 */}
+        <div className="flex flex-col gap-6 lg:block">
           <div className="order-2 lg:order-1">
-            <aside className="flex w-full flex-col gap-4 lg:sticky lg:top-8 lg:max-w-[280px]">
+            <aside className="flex w-full flex-col gap-4 lg:fixed lg:left-[max(1rem,calc(50vw-36rem+1rem))] lg:top-8 lg:z-30 lg:w-[272px] lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
               <div className="rounded-3xl border border-zinc-200/80 bg-white/90 p-5 shadow-sm dark:border-zinc-800/80 dark:bg-zinc-950/80">
                 <div className="flex items-center gap-4">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <Image
                     src="/self_pic.png"
                     alt=""
                     width={56}
@@ -86,12 +84,10 @@ export default function Home() {
             </aside>
           </div>
 
-          {/* 右欄 */}
-          <div className="order-1 space-y-6 lg:order-2">
+          <div className="order-1 space-y-6 lg:order-2 lg:ml-[300px]">
             <section className="rounded-3xl border border-zinc-200/80 bg-white/90 p-8 shadow-sm dark:border-zinc-800/80 dark:bg-zinc-950/80 sm:p-10 lg:p-12">
               <div className="flex flex-col items-center text-center">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src="/self_pic.png"
                   alt=""
                   width={160}
@@ -124,9 +120,6 @@ export default function Home() {
                 <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
                   Showreel
                 </h2>
-                <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                  精選影音縮影（Vimeo 嵌入）。
-                </p>
                 <div className="mt-4 aspect-video w-full overflow-hidden rounded-2xl border border-zinc-200/80 bg-zinc-100 dark:border-zinc-800/80 dark:bg-zinc-900/80">
                   <iframe
                     title="Showreel"
@@ -167,9 +160,6 @@ export default function Home() {
                   <h2 className="mt-2 text-xl font-semibold text-white sm:text-2xl">
                     作品集
                   </h2>
-                  <p className="mt-2 max-w-xl text-sm text-white/85">
-                    點擊卡片前往各媒材頁面。
-                  </p>
                 </header>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                   {portfolioLinks.map((item) => (

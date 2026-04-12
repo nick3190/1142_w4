@@ -17,9 +17,6 @@ export default function DeviceDesignPage() {
           <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
             裝置設計
           </h1>
-          <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-300">
-            聲響與新媒體裝置作品；卡片支援 hover 動畫並連結至介紹頁。
-          </p>
         </header>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {deviceWorks.map((work) => (
