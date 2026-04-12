@@ -75,12 +75,6 @@ export default function Home() {
                   >
                     Mail
                   </a>
-                  <a
-                    href="tel:0908700909"
-                    className="flex h-9 min-w-[2.25rem] items-center justify-center rounded-full border border-zinc-200 px-2 text-[10px] font-semibold text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
-                  >
-                    Tel
-                  </a>
                 </div>
               </div>
 
