@@ -358,7 +358,7 @@ export const deviceWorks: GridWork[] = [
 export const dynamicVideoWorks: GridWork[] = [
   {
     slug: "generation-identity-swap-sizzle",
-    year: "2025",
+    year: "2024",
     title: "世代解謎 樣帶",
     subtitle: "節目型態｜真人實境",
     summary: "為影像工作室之節目企劃，所剪輯之節目樣帶。",
@@ -366,7 +366,7 @@ export const dynamicVideoWorks: GridWork[] = [
       "⺟⼦隱瞞對方交換身分生活，究竟是通往彼此理解的道路，還是關係愈弄愈糟？",
       "目標群眾｜12~45歲，親子共賞節目",
       "概念｜透過任務破關的綜藝節目形式，除了呈現母子交換身分的有趣過程，更反映現今普遍的世代不理解，讓受眾有思考和自省的空間。",
-      "節目內容說明：母子交換身分體驗對方生活五天，並各自完成五個任務，獲得最後的獎賞。生活體驗和任務是帶動雙方想法、價值觀改變的媒介。",
+      "節目內容說明|母子交換身分體驗對方生活五天，並各自完成五個任務，獲得最後的獎賞。生活體驗和任務是帶動雙方想法、價值觀改變的媒介。",
     ],
     accent: "rose",
     externalUrl: "https://youtu.be/4CiK1SSy-ZQ",
