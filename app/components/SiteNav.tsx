@@ -8,6 +8,7 @@ const links = [
   { href: "/about_me", label: "關於我" },
   { href: "/experience", label: "經歷" },
   { href: "/audio", label: "配樂與聲音" },
+  { href: "/dynamic_video", label: "動態影像" },
   { href: "/graphic_design", label: "平面設計" },
   { href: "/web_design", label: "網頁設計" },
   { href: "/device_design", label: "裝置設計" },

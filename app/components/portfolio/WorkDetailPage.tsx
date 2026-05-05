@@ -57,6 +57,18 @@ export function WorkDetailPage({
               {work.body.map((para, i) => (
                 <p key={i}>{para}</p>
               ))}
+              {work.externalUrl ? (
+                <p>
+                  <a
+                    href={work.externalUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-violet-600 underline hover:text-violet-500 dark:text-violet-400"
+                  >
+                    前往作品連結
+                  </a>
+                </p>
+              ) : null}
             </div>
           </div>
         </article>

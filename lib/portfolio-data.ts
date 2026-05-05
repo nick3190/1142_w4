@@ -276,6 +276,8 @@ export type GridWork = {
   accent: Accent;
   /** 列表卡與詳情頁頂部封面（公開路徑） */
   coverImageUrl?: string;
+  /** 若設定，卡片與詳情頁將導向外部連結 */
+  externalUrl?: string;
 };
 
 export const graphicWorks: GridWork[] = [
@@ -284,7 +286,7 @@ export const graphicWorks: GridWork[] = [
     year: "2023",
     title: "《好食。雞蛋糕》",
     subtitle: "LOGO 主視覺設計",
-    summary: "太醜了不敢放出來，但作品太少所以拿出來佔位。",
+    summary: "《好食。雞蛋糕》 LOGO 與包裝視覺設計。",
     body: [
       "為《好食。雞蛋糕》設計 LOGO 與主視覺系統，延伸應用於攤車識別、社群貼文與簡易印刷物。",
     ],
@@ -295,7 +297,7 @@ export const graphicWorks: GridWork[] = [
     year: "2025",
     title: "網紅 T 恤設計",
     subtitle: "個人創作",
-    summary: "為知名網紅 亞洲統神 設計 T 恤，結合眾多統神金句連發。",
+    summary: "知名網紅金句 T 恤設計。",
     body: [
       "為知名網紅 亞洲統神 設計 T 恤，結合眾多統神金句連發。",
     ],
@@ -310,11 +312,12 @@ export const webWorks: GridWork[] = [
     year: "2026",
     title: "元榮批發電商平台 全端網站架設",
     subtitle: "React.js · Vite · Tailwind CSS",
-    summary: "使用 React 框架建置中大型電商平台",
+    summary: "使用 React Vite 建置中大型電商平台",
     body: [
-      "使用 React 框架建置中大型電商平台，個人進行全端網頁架設，網站涵蓋完整商品管理、購物車、結帳、會員系統等功能，並提供管理後台進行商品上架、訂單管理等操作。",
+      "使用 React Vite建置中大型電商平台，個人進行全端網頁架設，網站涵蓋完整商品管理、購物車、結帳、會員系統等功能，並提供管理後台進行商品上架、訂單管理等操作。",
     ],
     accent: "violet",
+    externalUrl: "https://yuan-zong.com/",
   },
   {
     slug: "",
@@ -338,6 +341,7 @@ export const deviceWorks: GridWork[] = [
       "DCT 華山園區特展作品，負責作品發想設計與執行，並擔任展務人員。",
     ],
     accent: "emerald",
+    coverImageUrl: `/portfolio/installation/${encodeURIComponent("｜浸聲 Immersion.png")}`,
   },
   {
     slug: "chao-nest-2024",
@@ -347,6 +351,25 @@ export const deviceWorks: GridWork[] = [
     summary: "以聲響與空間材質探索潮濕與念舊之意象。",
     body: ["聲響裝置創作。"],
     accent: "sky",
+    coverImageUrl: `/portfolio/installation/${encodeURIComponent("巢.png")}`,
+  },
+];
+
+export const dynamicVideoWorks: GridWork[] = [
+  {
+    slug: "generation-identity-swap-sizzle",
+    year: "2026",
+    title: "世代解謎 樣帶",
+    subtitle: "節目型態｜真人實境",
+    summary: "母子隱瞞對方交換身分生活，試圖找到彼此理解的可能。",
+    body: [
+      "⺟⼦隱瞞對方交換身分生活，究竟是通往彼此理解的道路，還是關係愈弄愈糟？",
+      "目標群眾｜12~45歲，親子共賞節目",
+      "概念｜透過任務破關的綜藝節目形式，除了呈現母子交換身分的有趣過程，更反映現今普遍的世代不理解，讓受眾有思考和自省的空間。",
+      "節目內容說明：母子交換身分體驗對方生活五天，並各自完成五個任務，獲得最後的獎賞。生活體驗和任務是帶動雙方想法、價值觀改變的媒介。",
+    ],
+    accent: "rose",
+    externalUrl: "https://youtu.be/4CiK1SSy-ZQ",
   },
 ];
 
@@ -388,7 +411,7 @@ export function workCoverClass(accent: Accent) {
 }
 
 export function getGridWork(
-  category: "graphic" | "web" | "device" | "mixing",
+  category: "graphic" | "web" | "device" | "mixing" | "dynamicVideo",
   slug: string,
 ): GridWork | undefined {
   const map = {
@@ -396,6 +419,7 @@ export function getGridWork(
     web: webWorks,
     device: deviceWorks,
     mixing: mixingWorks,
+    dynamicVideo: dynamicVideoWorks,
   }[category];
   return map.find((w) => w.slug === slug);
 }

@@ -17,6 +17,11 @@ const navItems = [
     subtitle: "播放清單與專案介紹",
   },
   {
+    href: "/dynamic_video",
+    title: "動態影像",
+    subtitle: "影像作品與節目企劃",
+  },
+  {
     href: "/graphic_design",
     title: "平面設計",
     subtitle: "主視覺與印刷／數位",

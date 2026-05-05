@@ -23,7 +23,7 @@ const projectRoles: Role[] = [
   {
     org: "國科會科藝展覽《媽祖繞月-太空站》",
     role: "聲音設計",
-    period: "2025.11",
+    period: "2025.08",
     detail: "參與《顯影用液》與《PM3000》之聲音設計，創作 VR 裝置之實驗性音樂。",
   },
   {

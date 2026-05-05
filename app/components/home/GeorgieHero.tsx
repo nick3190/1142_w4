@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 
 const DEFAULT_AVATAR = "/self_pic.png";
 const DEFAULT_CAPTION = "23 歲，創作遊走於聲響、音樂與電影之間。";
+const SHOW_GEORGIE_BUTTON = false;
 
 const FINALE_CAPTION = "我要回家了，掰。";
 
@@ -105,13 +106,15 @@ export function GeorgieHero({ georgiePoolPaths, finalePath }: GeorgieHeroProps) 
         {caption}
       </p>
       <div className="mt-8 flex flex-wrap justify-center gap-3">
-        <button
-          type="button"
-          onClick={onGeorgie}
-          className="rounded-full bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-violet-500 sm:px-7 dark:bg-violet-500 dark:hover:bg-violet-400"
-        >
-          看看我的寵物喬治
-        </button>
+        {SHOW_GEORGIE_BUTTON ? (
+          <button
+            type="button"
+            onClick={onGeorgie}
+            className="rounded-full bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-violet-500 sm:px-7 dark:bg-violet-500 dark:hover:bg-violet-400"
+          >
+            看看我的寵物喬治
+          </button>
+        ) : null}
         <Link
           href="/about_me"
           className="rounded-full border border-zinc-300 px-5 py-2.5 text-sm font-medium text-zinc-800 hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-100 dark:hover:bg-zinc-800"

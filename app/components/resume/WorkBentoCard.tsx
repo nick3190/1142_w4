@@ -10,9 +10,14 @@ type WorkBentoCardProps = {
 };
 
 export function WorkBentoCard({ work, href, className = "" }: WorkBentoCardProps) {
+  const linkHref = work.externalUrl ?? href;
+  const isExternal = Boolean(work.externalUrl);
+
   return (
     <Link
-      href={href}
+      href={linkHref}
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noopener noreferrer" : undefined}
       className={`group relative flex flex-col overflow-hidden rounded-2xl border border-zinc-200/80 bg-white/70 p-0 shadow-sm outline-none backdrop-blur-sm transition duration-300 ease-out hover:-translate-y-1 hover:border-violet-400/40 hover:shadow-xl hover:shadow-violet-500/10 focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-100 dark:border-zinc-800/80 dark:bg-zinc-950/60 dark:hover:border-violet-500/35 dark:hover:shadow-violet-500/15 dark:focus-visible:ring-offset-zinc-950 ${className}`}
     >
       <div
