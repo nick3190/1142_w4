@@ -99,7 +99,7 @@ export function GeorgieHero({ georgiePoolPaths, finalePath }: GeorgieHeroProps) 
           onError={() => setImageLoading(false)}
         />
       </div>
-      <h1 className="mt-8 text-2xl font-semibold text-zinc-900 dark:text-zinc-50 sm:text-3xl">
+      <h1 className="mt-8 whitespace-nowrap text-lg font-semibold text-zinc-900 dark:text-zinc-50 sm:text-2xl">
         歡迎來到 Nick Hsu 的個人網站
       </h1>
       <p className="mt-3 max-w-md text-sm text-zinc-600 dark:text-zinc-300">

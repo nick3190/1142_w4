@@ -48,9 +48,26 @@ export default function Home() {
   return (
     <main className="min-h-full">
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+        <div className="mb-4 lg:hidden">
+          <nav
+            aria-label="手機主要選單"
+            className="flex gap-2 overflow-x-auto rounded-2xl border border-zinc-200/80 bg-white/90 p-2 shadow-sm dark:border-zinc-800/80 dark:bg-zinc-950/80"
+          >
+            {sidebarLinks.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="shrink-0 rounded-full border border-zinc-200/80 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
+              >
+                {item.title}
+              </Link>
+            ))}
+          </nav>
+        </div>
+
         <div className="flex flex-col gap-6 lg:block">
-          <div className="order-2 lg:order-1">
-            <aside className="flex w-full flex-col gap-4 lg:fixed lg:left-[max(1rem,calc(50vw-36rem+1rem))] lg:top-8 lg:z-30 lg:w-[272px] lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
+          <div>
+            <aside className="hidden w-full flex-col gap-4 lg:fixed lg:left-[max(1rem,calc(50vw-36rem+1rem))] lg:top-8 lg:z-30 lg:flex lg:w-[272px] lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
               <div className="rounded-3xl border border-zinc-200/80 bg-white/90 p-5 shadow-sm dark:border-zinc-800/80 dark:bg-zinc-950/80">
                 <div className="flex items-center gap-4">
                   <Image
@@ -101,7 +118,7 @@ export default function Home() {
             </aside>
           </div>
 
-          <div className="order-1 space-y-6 lg:order-2 lg:ml-[300px]">
+          <div className="space-y-6 lg:ml-[300px]">
             <section className="rounded-3xl border border-zinc-200/80 bg-white/90 p-8 shadow-sm dark:border-zinc-800/80 dark:bg-zinc-950/80 sm:p-10 lg:p-12">
               <GeorgieHero
                 georgiePoolPaths={georgiePoolPaths}
@@ -153,14 +170,14 @@ export default function Home() {
                     精選作品
                   </h2>
                 </header>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="flex gap-3 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:gap-4 sm:overflow-visible lg:grid-cols-3">
                   {featuredWorks.map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="group relative block overflow-hidden rounded-2xl border border-white/20 bg-zinc-900/40 shadow-xl ring-1 ring-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                      className="group relative block w-[220px] shrink-0 overflow-hidden rounded-2xl border border-white/20 bg-zinc-900/40 shadow-xl ring-1 ring-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:w-auto"
                     >
-                      <div className="relative aspect-[4/3] w-full overflow-hidden">
+                      <div className="relative aspect-[3/2] w-full overflow-hidden sm:aspect-[4/3]">
                         <Image
                           src={item.imageSrc}
                           alt=""
