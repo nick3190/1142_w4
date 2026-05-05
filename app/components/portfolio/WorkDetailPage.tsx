@@ -38,22 +38,22 @@ export function WorkDetailPage({
               />
             ) : null}
           </div>
-          <div className="space-y-4 p-6 sm:p-8">
+          <div className="space-y-4 p-5 sm:p-8">
             <p className="text-xs font-medium uppercase tracking-widest text-zinc-500">
               {categoryLabel} · {work.year}
             </p>
-            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            <h1 className="break-words text-2xl font-semibold tracking-tight sm:text-3xl">
               {work.title}
             </h1>
             {work.subtitle && (
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              <p className="break-words text-sm text-zinc-600 dark:text-zinc-400">
                 {work.subtitle}
               </p>
             )}
             <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
               {work.summary}
             </p>
-            <div className="space-y-3 border-t border-zinc-200 pt-6 text-sm leading-relaxed text-zinc-600 dark:border-zinc-800 dark:text-zinc-300">
+            <div className="space-y-3 border-t border-zinc-200 pt-6 text-sm leading-relaxed break-words text-zinc-600 dark:border-zinc-800 dark:text-zinc-300">
               {work.body.map((para, i) => (
                 <p key={i}>{para}</p>
               ))}

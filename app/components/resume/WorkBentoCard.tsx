@@ -37,18 +37,18 @@ export function WorkBentoCard({ work, href, className = "" }: WorkBentoCardProps
           {work.year}
         </span>
       </div>
-      <div className="flex flex-1 flex-col gap-2 p-5">
+      <div className="flex min-w-0 flex-1 flex-col gap-2 p-5">
         <div>
-          <h2 className="text-base font-semibold tracking-tight text-zinc-900 transition group-hover:text-violet-700 dark:text-zinc-50 dark:group-hover:text-violet-300">
+          <h2 className="line-clamp-2 text-base font-semibold tracking-tight text-zinc-900 transition group-hover:text-violet-700 dark:text-zinc-50 dark:group-hover:text-violet-300">
             {work.title}
           </h2>
           {work.subtitle && (
-            <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="mt-0.5 line-clamp-2 text-xs text-zinc-500 dark:text-zinc-400">
               {work.subtitle}
             </p>
           )}
         </div>
-        <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
+        <p className="line-clamp-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
           {work.summary}
         </p>
         <span className="mt-auto inline-flex items-center gap-1 text-xs font-medium text-violet-600 opacity-0 transition duration-300 group-hover:translate-x-0.5 group-hover:opacity-100 dark:text-violet-400">

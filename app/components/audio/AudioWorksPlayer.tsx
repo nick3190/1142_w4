@@ -167,7 +167,7 @@ export function AudioWorksPlayer({
   const sound = useMemo(() => tracks.filter((t) => t.kind === "聲音設計"), [tracks]);
 
   return (
-    <div className="grid h-full min-h-0 w-full grid-rows-[minmax(0,22vh)_auto_minmax(0,20vh)] gap-1.5 sm:gap-2 lg:grid-cols-[minmax(0,15fr)_minmax(0,45fr)_minmax(0,25fr)] lg:grid-rows-1 lg:items-stretch lg:gap-3">
+    <div className="grid h-full min-h-0 w-full min-w-0 grid-rows-[minmax(0,22vh)_auto_minmax(0,20vh)] gap-1.5 sm:gap-2 lg:grid-cols-[minmax(0,15fr)_minmax(0,45fr)_minmax(0,25fr)] lg:grid-rows-1 lg:items-stretch lg:gap-3">
       <aside className="flex min-h-0 flex-col overflow-hidden rounded-xl border border-zinc-200/90 bg-white/95 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/95">
         <div className="shrink-0 border-b border-zinc-200 px-2 py-1 dark:border-zinc-800">
           <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-zinc-500">
@@ -329,12 +329,12 @@ function PlaylistGroup({
                     </span>
                     <span className="min-w-0 flex-1">
                       <span
-                        className={`block text-[11px] font-semibold leading-snug ${active ? "text-white" : ""}`}
+                        className={`block truncate text-[11px] font-semibold leading-snug ${active ? "text-white" : ""}`}
                       >
                         {work.title}
                       </span>
                       <span
-                        className={`mt-0.5 block text-[10px] leading-snug ${active ? "text-white/90" : "text-zinc-500 dark:text-zinc-400"}`}
+                        className={`mt-0.5 block truncate text-[10px] leading-snug ${active ? "text-white/90" : "text-zinc-500 dark:text-zinc-400"}`}
                       >
                         {clip.label}
                       </span>
@@ -367,7 +367,7 @@ function PlaylistGroup({
               <button
                 type="button"
                 onClick={() => onPlayWorkFirst(work.slug)}
-                className="min-w-0 flex-1 px-2 py-2 text-left text-[11px] font-semibold leading-snug text-zinc-800 transition hover:bg-zinc-100/90 dark:text-zinc-200 dark:hover:bg-zinc-800/60"
+                className="min-w-0 flex-1 truncate px-2 py-2 text-left text-[11px] font-semibold leading-snug text-zinc-800 transition hover:bg-zinc-100/90 dark:text-zinc-200 dark:hover:bg-zinc-800/60"
               >
                 {work.title}
               </button>
@@ -610,6 +610,12 @@ function PlaybackDeck({
     width: "min(380px, min(92%, calc(100dvh - 11rem)))",
     height: "min(380px, min(92%, calc(100dvh - 11rem)))",
   } as const;
+  const videoStyle = {
+    width: "min(760px, 96%)",
+    aspectRatio: "16 / 9",
+    maxHeight: "min(54vw, calc(100dvh - 13rem))",
+  } as const;
+  const useVideoFrame = mode === "youtube" || mode === "video";
 
   return (
     <section className="flex h-full max-h-full w-full max-w-[min(100%,520px)] flex-col justify-between overflow-hidden rounded-xl border border-zinc-700/80 bg-gradient-to-b from-zinc-900 via-zinc-900 to-zinc-950 px-2.5 py-2.5 text-zinc-100 shadow-md sm:px-3 sm:py-3">
@@ -626,7 +632,7 @@ function PlaybackDeck({
         <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-violet-300/90">
           Now playing
         </p>
-        <h2 className="mt-1 line-clamp-2 text-sm font-semibold leading-snug sm:text-base">
+        <h2 className="mt-1 line-clamp-2 break-words text-sm font-semibold leading-snug sm:text-base">
           {entry.work.title}
         </h2>
         <p className="mt-0.5 truncate text-xs text-violet-200/90 sm:text-sm">
@@ -640,14 +646,17 @@ function PlaybackDeck({
       <div className="my-2 flex shrink-0 justify-center sm:my-3">
         <div
           className="relative shrink-0 overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10"
-          style={squareStyle}
+          style={useVideoFrame ? videoStyle : squareStyle}
         >
+          {useVideoFrame ? (
+            <div className="pointer-events-none absolute inset-0 bg-black" aria-hidden />
+          ) : null}
           {mode === "youtube" && embedSrc ? (
             <iframe
               key={`${embedSrc}-${autoplayTick}`}
               title={entry.clip.label}
               src={embedSrc}
-              className="h-full w-full bg-black"
+              className={`bg-black ${useVideoFrame ? "absolute inset-0 h-full w-full" : "h-full w-full"}`}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
             />
@@ -763,7 +772,7 @@ function PlaybackDeck({
             type="button"
             onClick={onPrev}
             disabled={flatIndex <= 0}
-            className="rounded-full border border-zinc-600 px-2.5 py-1.5 text-[10px] font-medium text-zinc-200 hover:bg-zinc-800 disabled:opacity-30 sm:px-3.5 sm:text-xs"
+            className="shrink-0 whitespace-nowrap rounded-full border border-zinc-600 px-2.5 py-1.5 text-[10px] font-medium text-zinc-200 hover:bg-zinc-800 disabled:opacity-30 sm:px-3.5 sm:text-xs"
           >
             上一段
           </button>
@@ -780,7 +789,7 @@ function PlaybackDeck({
             type="button"
             onClick={onNext}
             disabled={flatIndex >= queueLength - 1}
-            className="rounded-full border border-zinc-600 px-2.5 py-1.5 text-[10px] font-medium text-zinc-200 hover:bg-zinc-800 disabled:opacity-30 sm:px-3.5 sm:text-xs"
+            className="shrink-0 whitespace-nowrap rounded-full border border-zinc-600 px-2.5 py-1.5 text-[10px] font-medium text-zinc-200 hover:bg-zinc-800 disabled:opacity-30 sm:px-3.5 sm:text-xs"
           >
             下一段
           </button>

@@ -86,11 +86,11 @@ export default function Home() {
                     href={item.href}
                     className="flex items-start justify-between gap-3 rounded-3xl border border-zinc-200/80 bg-white/90 px-4 py-3 shadow-sm hover:border-violet-400/40 hover:shadow-md dark:border-zinc-800/80 dark:bg-zinc-950/80 dark:hover:border-violet-500/35"
                   >
-                    <div>
-                      <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-50">
                         {item.title}
                       </p>
-                      <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+                      <p className="mt-0.5 truncate text-xs text-zinc-500 dark:text-zinc-400">
                         {item.desc}
                       </p>
                     </div>
@@ -180,10 +180,10 @@ export default function Home() {
                         </div>
                       </div>
                       <div className="border-t border-white/10 bg-black/25 px-4 py-3 backdrop-blur-md">
-                        <h3 className="text-base font-semibold text-white">
+                        <h3 className="truncate text-base font-semibold text-white">
                           {item.title}
                         </h3>
-                        <p className="mt-1 text-xs text-white/80">{item.subtitle}</p>
+                        <p className="mt-1 truncate text-xs text-white/80">{item.subtitle}</p>
                       </div>
                     </Link>
                   ))}

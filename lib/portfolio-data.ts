@@ -358,10 +358,10 @@ export const deviceWorks: GridWork[] = [
 export const dynamicVideoWorks: GridWork[] = [
   {
     slug: "generation-identity-swap-sizzle",
-    year: "2026",
+    year: "2025",
     title: "世代解謎 樣帶",
     subtitle: "節目型態｜真人實境",
-    summary: "母子隱瞞對方交換身分生活，試圖找到彼此理解的可能。",
+    summary: "為影像工作室之節目企劃，所剪輯之節目樣帶。",
     body: [
       "⺟⼦隱瞞對方交換身分生活，究竟是通往彼此理解的道路，還是關係愈弄愈糟？",
       "目標群眾｜12~45歲，親子共賞節目",
@@ -370,6 +370,18 @@ export const dynamicVideoWorks: GridWork[] = [
     ],
     accent: "rose",
     externalUrl: "https://youtu.be/4CiK1SSy-ZQ",
+  },
+  {
+    slug: "commercial-ai-drawing-explainer",
+    year: "2024",
+    title: "商案_AI繪圖工具科普影片",
+    summary:
+      "與社會團體合作之影片，使用動畫介紹 AI 繪圖工具之沿革，並提供 AI 科普相關知識。",
+    body: [
+      "與社會團體合作之影片，使用動畫介紹AI繪圖工具之沿革，並提供AI科普相關知識。",
+    ],
+    accent: "cyan",
+    externalUrl: "/portfolio/animation/output.mp4",
   },
 ];
 

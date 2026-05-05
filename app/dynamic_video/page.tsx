@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { WorkBentoCard } from "../components/resume/WorkBentoCard";
+import { DynamicVideoGallery } from "../components/portfolio/DynamicVideoGallery";
 import { dynamicVideoWorks } from "@/lib/portfolio-data";
 
 export const metadata: Metadata = {
@@ -18,15 +18,7 @@ export default function DynamicVideoPage() {
             動態影像
           </h1>
         </header>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {dynamicVideoWorks.map((work) => (
-            <WorkBentoCard
-              key={work.slug}
-              work={work}
-              href={`/dynamic_video/${work.slug}`}
-            />
-          ))}
-        </div>
+        <DynamicVideoGallery works={dynamicVideoWorks} />
       </div>
     </main>
   );

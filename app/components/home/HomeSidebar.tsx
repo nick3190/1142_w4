@@ -77,11 +77,11 @@ export function HomeSidebar() {
             href={item.href}
             className="group flex items-start justify-between gap-3 rounded-3xl border border-zinc-200/80 bg-white/90 px-4 py-3 shadow-sm transition hover:border-violet-400/40 hover:shadow-md dark:border-zinc-800/80 dark:bg-zinc-950/80 dark:hover:border-violet-500/35"
           >
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
                 {item.title}
               </p>
-              <p className="mt-0.5 text-xs leading-snug text-zinc-500 dark:text-zinc-400">
+              <p className="mt-0.5 truncate text-xs leading-snug text-zinc-500 dark:text-zinc-400">
                 {item.subtitle}
               </p>
             </div>
