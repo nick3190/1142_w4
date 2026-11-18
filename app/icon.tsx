@@ -15,8 +15,9 @@ export default function Icon() {
           justifyContent: "center",
           fontSize: 18,
           fontWeight: 700,
-          color: "#fafafa",
-          background: "linear-gradient(135deg,#6d28d9,#0ea5e9)",
+          color: "#000",
+          background: "#ededed",
+          borderRadius: "50%",
         }}
       >
         N

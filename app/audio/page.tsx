@@ -20,17 +20,12 @@ export default async function AudioPage({ searchParams }: PageProps) {
     sp.play === "true";
 
   return (
-    <main className="flex h-[100dvh] max-h-[100dvh] flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
-      <div className="mx-auto flex w-full max-w-[100rem] min-h-0 flex-1 flex-col px-3 pt-3 pb-2 sm:px-4 sm:pt-4">
-        <header className="shrink-0 border-b border-zinc-200/80 pb-2 dark:border-zinc-800/80">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-violet-600 dark:text-violet-400">
-            Audio
-          </p>
-          <h1 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-xl">
-            配樂與聲音設計
-          </h1>
-        </header>
-        <div className="min-h-0 flex-1 pt-2">
+    <main className="flex h-[calc(100dvh-5.25rem)] flex-col overflow-hidden bg-ink lg:h-[calc(100dvh-3rem)]">
+      <div className="flex w-full min-h-0 flex-1 flex-col px-3 pt-4 pb-3 sm:px-5 lg:px-8">
+        <h1 className="shrink-0 pb-3 font-serif text-2xl text-paper sm:text-3xl">
+          配樂與聲音設計
+        </h1>
+        <div className="min-h-0 flex-1">
           <AudioWorksPlayer
             tracks={audioTracks}
             initialSlug={sp.slug}

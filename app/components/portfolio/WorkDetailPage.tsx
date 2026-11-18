@@ -15,19 +15,29 @@ export function WorkDetailPage({
   listHref,
 }: WorkDetailPageProps) {
   return (
-    <main className="min-h-full bg-zinc-100 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50">
-      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+    <main className="min-h-full bg-ink text-paper">
+      <div className="mx-auto max-w-3xl px-5 py-10 sm:px-8 lg:py-16">
         <Link
           href={listHref}
-          className="text-sm text-violet-600 hover:underline dark:text-violet-400"
+          className="text-sm text-mute transition-colors hover:text-paper"
         >
-          ← 返回{categoryLabel}
+          返回{categoryLabel}
         </Link>
-        <article className="mt-8 overflow-hidden rounded-2xl border border-zinc-200/80 bg-white/80 shadow-sm dark:border-zinc-800/80 dark:bg-zinc-950/70">
-          <div
-            className={`relative h-48 w-full overflow-hidden sm:h-56 ${workCoverClass(work.accent)}`}
-          >
-            {work.coverImageUrl ? (
+        <article className="mt-8">
+          <p className="flex gap-3 text-xs text-mute">
+            <span>{categoryLabel}</span>
+            <span>{work.year}</span>
+          </p>
+          <h1 className="mt-2 font-serif text-3xl leading-tight break-words sm:text-4xl">
+            {work.title}
+          </h1>
+          {work.subtitle && (
+            <p className="mt-2 text-base break-words text-mute">{work.subtitle}</p>
+          )}
+          {work.coverImageUrl ? (
+            <div
+              className={`relative mt-8 aspect-[16/10] w-full overflow-hidden ${workCoverClass(work.accent)}`}
+            >
               <Image
                 src={work.coverImageUrl}
                 alt={work.title}
@@ -36,40 +46,25 @@ export function WorkDetailPage({
                 sizes="(max-width: 768px) 100vw, 48rem"
                 priority
               />
-            ) : null}
-          </div>
-          <div className="space-y-4 p-5 sm:p-8">
-            <p className="text-xs font-medium uppercase tracking-widest text-zinc-500">
-              {categoryLabel} · {work.year}
-            </p>
-            <h1 className="break-words text-2xl font-semibold tracking-tight sm:text-3xl">
-              {work.title}
-            </h1>
-            {work.subtitle && (
-              <p className="break-words text-sm text-zinc-600 dark:text-zinc-400">
-                {work.subtitle}
-              </p>
-            )}
-            <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              {work.summary}
-            </p>
-            <div className="space-y-3 border-t border-zinc-200 pt-6 text-sm leading-relaxed break-words text-zinc-600 dark:border-zinc-800 dark:text-zinc-300">
-              {work.body.map((para, i) => (
-                <p key={i}>{para}</p>
-              ))}
-              {work.externalUrl ? (
-                <p>
-                  <a
-                    href={work.externalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-violet-600 underline hover:text-violet-500 dark:text-violet-400"
-                  >
-                    前往作品連結
-                  </a>
-                </p>
-              ) : null}
             </div>
+          ) : null}
+          <div className="mt-8 max-w-[38em] space-y-4 text-[15px] leading-[1.9] break-words text-paper/85">
+            <p className="text-paper">{work.summary}</p>
+            {work.body.map((para, i) => (
+              <p key={i}>{para}</p>
+            ))}
+            {work.externalUrl ? (
+              <p>
+                <a
+                  href={work.externalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-paper underline decoration-line underline-offset-4 transition-colors hover:decoration-paper"
+                >
+                  前往作品連結
+                </a>
+              </p>
+            ) : null}
           </div>
         </article>
       </div>

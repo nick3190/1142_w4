@@ -9,16 +9,13 @@ export const metadata: Metadata = {
 export default function MixingPage() {
   return (
     <main className="min-h-full">
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-        <header className="mb-8 max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
-            Portfolio
-          </p>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
+      <div className="px-5 py-10 sm:px-8 lg:px-12 lg:py-16">
+        <header className="mb-10 max-w-2xl">
+          <h1 className="font-serif text-3xl text-paper sm:text-4xl">
             混音
           </h1>
         </header>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 xl:grid-cols-3">
           {mixingWorks.map((work) => (
             <WorkBentoCard
               key={work.slug}

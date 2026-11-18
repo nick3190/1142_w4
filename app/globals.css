@@ -1,28 +1,37 @@
 @import "tailwindcss";
 
+/*
+ * 黑白系統：純黑底、偏冷的紙白文字、兩階灰。沒有任何彩色強調。
+ * ink   #000000  背景
+ * paper #EDEDED  主要文字
+ * mute  #8A8A8A  次要文字
+ * line  #2A2A2A  分隔線、外框
+ * faint #111111  浮起的面（播放器、卡片底）
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ink: #000000;
+  --paper: #ededed;
+  --mute: #8a8a8a;
+  --line: #2a2a2a;
+  --faint: #111111;
+  color-scheme: dark;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-mute: var(--mute);
+  --color-line: var(--line);
+  --color-faint: var(--faint);
+  --font-sans: var(--font-geist-sans), var(--font-noto-sans), system-ui, sans-serif;
+  --font-serif: var(--font-noto-serif), "Songti TC", serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-sans);
+  font-feature-settings: "palt" 1;
 }
 
 html,
@@ -34,4 +43,62 @@ body {
 img,
 video {
   max-width: 100%;
+}
+
+::selection {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 1px solid var(--paper);
+  outline-offset: 3px;
+}
+
+/* 換頁：新頁面在黑幕裂開時淡入 */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.page-enter {
+  animation: page-enter 0.5s 0.28s ease-out backwards;
+}
+
+/* 保險：就算 JS 沒跑，黑幕也會自己消失 */
+@keyframes veil-out {
+  to {
+    visibility: hidden;
+  }
+}
+.page-veil {
+  animation: veil-out 0s 1.2s forwards;
+}
+
+/* 播放中的曲目旁那三根小音柱 */
+@keyframes eq {
+  0%,
+  100% {
+    transform: scaleY(0.25);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+.eq-bar {
+  transform-origin: bottom;
+  animation: eq 0.9s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter,
+  .eq-bar {
+    animation: none;
+  }
+  .page-veil {
+    display: none;
+  }
 }

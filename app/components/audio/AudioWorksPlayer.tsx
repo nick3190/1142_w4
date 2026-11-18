@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AudioClip, AudioTrack } from "@/lib/portfolio-data";
+import { attachAnalyser } from "@/lib/audio-graph";
+import { ParticleRing } from "../ParticleRing";
 
 function isVideoUrl(u: string) {
   return /\.(mov|mp4|webm|m4v|ogv)(\?.*)?$/i.test(u);
@@ -83,6 +85,7 @@ export function AudioWorksPlayer({
   }, [queue, initialSlug]);
 
   const [flatIndex, setFlatIndex] = useState(initialFlat);
+  const [deckPlaying, setDeckPlaying] = useState(false);
   const current = queue[flatIndex] ?? queue[0];
 
   const initialOpenSlug = queue[initialFlat]?.work.slug ?? "";
@@ -167,22 +170,18 @@ export function AudioWorksPlayer({
   const sound = useMemo(() => tracks.filter((t) => t.kind === "聲音設計"), [tracks]);
 
   return (
-    <div className="grid h-full min-h-0 w-full min-w-0 grid-rows-[minmax(0,22vh)_auto_minmax(0,20vh)] gap-1.5 sm:gap-2 lg:grid-cols-[minmax(0,15fr)_minmax(0,45fr)_minmax(0,25fr)] lg:grid-rows-1 lg:items-stretch lg:gap-3">
-      <aside className="flex min-h-0 flex-col overflow-hidden rounded-xl border border-zinc-200/90 bg-white/95 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/95">
-        <div className="shrink-0 border-b border-zinc-200 px-2 py-1 dark:border-zinc-800">
-          <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-zinc-500">
-            Queue
-          </p>
-          <p className="text-[11px] font-semibold text-zinc-900 dark:text-zinc-100">
-            播放清單
-          </p>
-        </div>
+    <div className="grid h-full min-h-0 w-full min-w-0 grid-rows-[minmax(0,18vh)_minmax(0,1fr)_minmax(0,16vh)] gap-2 lg:grid-cols-[minmax(0,15fr)_minmax(0,45fr)_minmax(0,25fr)] lg:grid-rows-1 lg:items-stretch lg:gap-4">
+      <aside className="flex min-h-0 flex-col overflow-hidden border border-line">
+        <h2 className="shrink-0 border-b border-line px-3 py-2 text-sm text-paper">
+          播放清單
+        </h2>
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           <PlaylistGroup
             label="配樂"
             works={score}
             queue={queue}
             flatIndex={flatIndex}
+            playing={deckPlaying}
             expandable
             openSlugs={openSlugs}
             onToggleWork={toggleWorkOpen}
@@ -194,6 +193,7 @@ export function AudioWorksPlayer({
             works={sound}
             queue={queue}
             flatIndex={flatIndex}
+            playing={deckPlaying}
             expandable={false}
             openSlugs={openSlugs}
             onToggleWork={toggleWorkOpen}
@@ -203,7 +203,7 @@ export function AudioWorksPlayer({
         </div>
       </aside>
 
-      <div className="flex min-h-0 min-w-0 items-center justify-center py-1 lg:py-0">
+      <div className="flex min-h-0 min-w-0 justify-center">
         <PlaybackDeck
           key={`${current.work.slug}-${current.clip.label}-${current.clip.url ?? ""}-${current.clip.youtubeUrl ?? ""}`}
           entry={current}
@@ -212,42 +212,34 @@ export function AudioWorksPlayer({
           autoplayTick={autoplayTick}
           onPrev={() => goFlat(flatIndex - 1)}
           onNext={() => goFlat(flatIndex + 1)}
+          onPlayingChange={setDeckPlaying}
         />
       </div>
 
-      <aside className="min-h-0 min-w-0 overflow-y-auto overscroll-contain rounded-xl border border-zinc-200/90 bg-white/95 p-2 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/95 sm:p-2.5">
-        <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-zinc-500">
-          About
-        </p>
-        <h3 className="mt-1 text-sm font-semibold leading-snug text-zinc-900 dark:text-zinc-50">
+      <aside className="min-h-0 min-w-0 overflow-y-auto overscroll-contain border border-line p-3 sm:p-4">
+        <h3 className="font-serif text-lg leading-snug text-paper">
           {current.work.title}
         </h3>
         {current.work.subtitle && (
-          <p className="mt-0.5 text-[11px] text-violet-600 dark:text-violet-400">
-            {current.work.subtitle}
-          </p>
+          <p className="mt-1 text-sm text-paper/80">{current.work.subtitle}</p>
         )}
-        <p className="mt-1 text-[10px] text-zinc-500">
-          {current.work.kind} · {current.work.year}
-        </p>
-        <p className="mt-0.5 text-[10px] text-zinc-400">
-          目前：{current.clip.label}
+        <p className="mt-2 flex gap-3 text-xs text-mute">
+          <span>{current.work.kind}</span>
+          <span>{current.work.year}</span>
         </p>
         {current.work.introSections?.length ? (
-          <div className="mt-3 space-y-3 border-t border-zinc-200/80 pt-3 dark:border-zinc-800/80">
+          <div className="mt-4 space-y-4 border-t border-line pt-4">
             {current.work.introSections.map((section) => (
               <div key={section.heading}>
-                <p className="text-[10px] font-semibold tracking-wide text-zinc-800 dark:text-zinc-200">
-                  {section.heading}
-                </p>
-                <p className="mt-1 whitespace-pre-line text-[11px] leading-relaxed text-zinc-600 dark:text-zinc-300">
+                <p className="text-xs text-paper">{section.heading}</p>
+                <p className="mt-1 whitespace-pre-line text-[13px] leading-relaxed text-mute">
                   {section.text}
                 </p>
               </div>
             ))}
           </div>
         ) : (
-          <p className="mt-2 text-[11px] leading-relaxed text-zinc-600 dark:text-zinc-300">
+          <p className="mt-3 text-[13px] leading-relaxed text-mute">
             {current.work.description}
           </p>
         )}
@@ -256,11 +248,30 @@ export function AudioWorksPlayer({
   );
 }
 
+function PlayingMark({ active, playing }: { active: boolean; playing: boolean }) {
+  if (active && playing) {
+    return (
+      <span className="flex h-3 w-3 shrink-0 items-end gap-[2px]" aria-hidden>
+        <span className="eq-bar h-full w-[2px] bg-current" />
+        <span className="eq-bar h-full w-[2px] bg-current [animation-delay:-0.3s]" />
+        <span className="eq-bar h-full w-[2px] bg-current [animation-delay:-0.6s]" />
+      </span>
+    );
+  }
+  return (
+    <span
+      className={`h-1 w-1 shrink-0 rounded-full ${active ? "bg-current" : "bg-line"}`}
+      aria-hidden
+    />
+  );
+}
+
 type PlaylistGroupProps = {
   label: string;
   works: AudioTrack[];
   queue: QueueEntry[];
   flatIndex: number;
+  playing: boolean;
   expandable: boolean;
   openSlugs: Record<string, boolean>;
   onToggleWork: (slug: string) => void;
@@ -273,6 +284,7 @@ function PlaylistGroup({
   works,
   queue,
   flatIndex,
+  playing,
   expandable,
   openSlugs,
   onToggleWork,
@@ -281,10 +293,8 @@ function PlaylistGroup({
 }: PlaylistGroupProps) {
   if (works.length === 0) return null;
   return (
-    <div className="border-b border-zinc-100 px-1.5 py-2 last:border-b-0 dark:border-zinc-800/80">
-      <p className="px-1.5 pb-1.5 text-[9px] font-semibold uppercase tracking-widest text-zinc-400">
-        {label}
-      </p>
+    <div className="border-b border-line py-2 last:border-b-0">
+      <p className="px-3 pb-1 text-xs text-mute">{label}</p>
       {works.map((work) => {
         const open = expandable ? (openSlugs[work.slug] ?? false) : true;
         const clips = work.clips?.length
@@ -293,10 +303,7 @@ function PlaylistGroup({
 
         if (!expandable) {
           return (
-            <div
-              key={work.slug}
-              className="mb-1 rounded-lg border border-zinc-200/80 bg-zinc-50/80 dark:border-zinc-800 dark:bg-zinc-950/40"
-            >
+            <div key={work.slug}>
               {clips.map((clip) => {
                 const qi = queue.findIndex(
                   (q) =>
@@ -310,31 +317,22 @@ function PlaylistGroup({
                     type="button"
                     disabled={qi < 0}
                     onClick={() => onPickClip(qi)}
-                    className={`flex w-full items-start gap-2 px-2 py-2 text-left transition ${
+                    aria-current={active ? "true" : undefined}
+                    className={`flex w-full items-center gap-2.5 px-3 py-1.5 text-left transition-colors ${
                       active
-                        ? "bg-violet-600 text-white shadow-sm dark:bg-violet-500"
+                        ? "bg-paper text-ink"
                         : playable
-                          ? "text-zinc-800 hover:bg-zinc-100/90 dark:text-zinc-200 dark:hover:bg-zinc-800/60"
-                          : "cursor-not-allowed text-zinc-400 dark:text-zinc-500"
+                          ? "text-paper hover:bg-faint"
+                          : "cursor-not-allowed text-mute"
                     }`}
                   >
-                    <span
-                      className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[9px] font-bold ${
-                        active
-                          ? "bg-white/20 text-white"
-                          : "bg-zinc-200 text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300"
-                      }`}
-                    >
-                      {playable ? "♪" : "—"}
-                    </span>
+                    <PlayingMark active={active} playing={playing} />
                     <span className="min-w-0 flex-1">
-                      <span
-                        className={`block truncate text-[11px] font-semibold leading-snug ${active ? "text-white" : ""}`}
-                      >
+                      <span className="block truncate text-[13px] leading-snug">
                         {work.title}
                       </span>
                       <span
-                        className={`mt-0.5 block truncate text-[10px] leading-snug ${active ? "text-white/90" : "text-zinc-500 dark:text-zinc-400"}`}
+                        className={`block truncate text-[11px] leading-snug ${active ? "text-ink/70" : "text-mute"}`}
                       >
                         {clip.label}
                       </span>
@@ -347,33 +345,30 @@ function PlaylistGroup({
         }
 
         return (
-          <div
-            key={work.slug}
-            className="mb-1.5 rounded-lg border border-zinc-200/80 bg-zinc-50/80 dark:border-zinc-800 dark:bg-zinc-950/40"
-          >
-            <div className="flex w-full items-stretch gap-0.5">
+          <div key={work.slug}>
+            <div className="flex w-full items-stretch">
               <button
                 type="button"
                 aria-expanded={open}
-                aria-label={open ? "收合曲目" : "展開曲目"}
+                aria-label={open ? `收合 ${work.title}` : `展開 ${work.title}`}
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggleWork(work.slug);
                 }}
-                className="inline-flex w-8 shrink-0 items-center justify-center rounded-l-lg border-r border-zinc-200/80 text-[11px] text-zinc-500 transition hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-800/60"
+                className="inline-flex w-8 shrink-0 items-center justify-center text-sm text-mute transition-colors hover:text-paper"
               >
                 {open ? "−" : "+"}
               </button>
               <button
                 type="button"
                 onClick={() => onPlayWorkFirst(work.slug)}
-                className="min-w-0 flex-1 truncate px-2 py-2 text-left text-[11px] font-semibold leading-snug text-zinc-800 transition hover:bg-zinc-100/90 dark:text-zinc-200 dark:hover:bg-zinc-800/60"
+                className="min-w-0 flex-1 truncate py-1.5 pr-3 text-left text-[13px] leading-snug text-paper transition-colors hover:text-mute"
               >
                 {work.title}
               </button>
             </div>
             {open ? (
-              <ul className="space-y-0.5 border-t border-zinc-200/70 px-1 pb-1.5 pt-1 dark:border-zinc-800/80">
+              <ul className="pb-1">
                 {clips.map((clip) => {
                   const qi = queue.findIndex(
                     (q) =>
@@ -389,24 +384,17 @@ function PlaylistGroup({
                         type="button"
                         disabled={qi < 0}
                         onClick={() => onPickClip(qi)}
-                        className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[11px] transition ${
+                        aria-current={active ? "true" : undefined}
+                        className={`flex w-full items-center gap-2.5 py-1 pr-3 pl-8 text-left text-xs transition-colors ${
                           active
-                            ? "bg-violet-600 text-white shadow-sm dark:bg-violet-500"
+                            ? "bg-paper text-ink"
                             : playable
-                              ? "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-800"
-                              : "cursor-not-allowed text-zinc-400 dark:text-zinc-500"
+                              ? "text-mute hover:bg-faint hover:text-paper"
+                              : "cursor-not-allowed text-line"
                         }`}
                       >
-                        <span
-                          className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[9px] font-bold ${
-                            active
-                              ? "bg-white/20 text-white"
-                              : "bg-zinc-200 text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400"
-                          }`}
-                        >
-                          {playable ? "♪" : "—"}
-                        </span>
-                        <span className="min-w-0 flex-1 truncate font-medium">
+                        <PlayingMark active={active} playing={playing} />
+                        <span className="min-w-0 flex-1 truncate">
                           {clip.label}
                         </span>
                       </button>
@@ -429,6 +417,7 @@ type PlaybackDeckProps = {
   autoplayTick: number;
   onPrev: () => void;
   onNext: () => void;
+  onPlayingChange: (playing: boolean) => void;
 };
 
 function PlaybackDeck({
@@ -438,6 +427,7 @@ function PlaybackDeck({
   autoplayTick,
   onPrev,
   onNext,
+  onPlayingChange,
 }: PlaybackDeckProps) {
   const mode = deckMode(entry.clip);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -449,16 +439,48 @@ function PlaybackDeck({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
 
+  // 即時頻譜
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const freqRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
+  const playingRef = useRef(false);
+
   const canPlayLocal =
     mode === "video" || mode === "cover-audio" || mode === "audio";
   const canPlay = mode === "youtube" || canPlayLocal;
   const canSeek = canPlayLocal && duration > 0;
+  const showsRing = mode === "audio" || mode === "cover-audio";
 
   const timingMedia = (): HTMLMediaElement | null => {
     if (mode === "video") return videoRef.current;
     if (mode === "cover-audio" || mode === "audio") return audioRef.current;
     return null;
   };
+
+  useEffect(() => {
+    playingRef.current = isPlaying;
+    onPlayingChange(isPlaying);
+  }, [isPlaying, onPlayingChange]);
+
+  useEffect(() => {
+    return () => onPlayingChange(false);
+  }, [onPlayingChange]);
+
+  const connectAnalyser = useCallback((el: HTMLMediaElement | null) => {
+    if (!el || analyserRef.current) return;
+    void attachAnalyser(el).then((a) => {
+      if (!a) return;
+      analyserRef.current = a;
+      freqRef.current = new Uint8Array(a.frequencyBinCount);
+    });
+  }, []);
+
+  const getSpectrum = useCallback(() => {
+    const a = analyserRef.current;
+    const buf = freqRef.current;
+    if (!a || !buf || !playingRef.current) return null;
+    a.getByteFrequencyData(buf);
+    return buf;
+  }, []);
 
   useEffect(() => {
     setIsPlaying(false);
@@ -507,30 +529,26 @@ function PlaybackDeck({
       setDuration(Number.isFinite(el.duration) ? el.duration : 0);
     };
     const onEnded = () => setIsPlaying(false);
+    const onPlay = () => {
+      setIsPlaying(true);
+      if (mode !== "video") connectAnalyser(el);
+    };
+    const onPause = () => setIsPlaying(false);
     el.addEventListener("timeupdate", onTime);
     el.addEventListener("loadedmetadata", onTime);
     el.addEventListener("durationchange", onTime);
     el.addEventListener("ended", onEnded);
+    el.addEventListener("play", onPlay);
+    el.addEventListener("pause", onPause);
     return () => {
       el.removeEventListener("timeupdate", onTime);
       el.removeEventListener("loadedmetadata", onTime);
       el.removeEventListener("durationchange", onTime);
       el.removeEventListener("ended", onEnded);
+      el.removeEventListener("play", onPlay);
+      el.removeEventListener("pause", onPause);
     };
-  }, [entry.work.slug, entry.clip.url, mode]);
-
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v || mode !== "video") return;
-    const onPlay = () => setIsPlaying(true);
-    const onPause = () => setIsPlaying(false);
-    v.addEventListener("play", onPlay);
-    v.addEventListener("pause", onPause);
-    return () => {
-      v.removeEventListener("play", onPlay);
-      v.removeEventListener("pause", onPause);
-    };
-  }, [mode, entry.clip.url]);
+  }, [entry.work.slug, entry.clip.url, mode, connectAnalyser]);
 
   const seekFromClientX = useCallback(
     (clientX: number) => {
@@ -578,6 +596,17 @@ function PlaybackDeck({
     setBarDragging(false);
   };
 
+  const onBarKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const el = timingMedia();
+    if (!el || !canSeek) return;
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+      e.preventDefault();
+      const step = e.key === "ArrowRight" ? 5 : -5;
+      el.currentTime = Math.max(0, Math.min(el.duration, el.currentTime + step));
+      setProgress(el.currentTime);
+    }
+  };
+
   const togglePlay = async () => {
     if (mode === "youtube") return;
     const el = timingMedia();
@@ -587,6 +616,8 @@ function PlaybackDeck({
       setIsPlaying(false);
       return;
     }
+    // 在點擊的同步段落裡喚醒 AudioContext
+    if (mode !== "video") connectAnalyser(el);
     try {
       await el.play();
       setIsPlaying(true);
@@ -606,19 +637,19 @@ function PlaybackDeck({
       ? `${embedBase}${embedBase.includes("?") ? "&" : "?"}autoplay=1`
       : embedBase;
 
+  // 父層是 size container，用 cqw/cqh 讓視窗在可用空間內保持正方形／16:9
   const squareStyle = {
-    width: "min(380px, min(92%, calc(100dvh - 11rem)))",
-    height: "min(380px, min(92%, calc(100dvh - 11rem)))",
+    width: "min(420px, 100cqw, 100cqh)",
+    height: "min(420px, 100cqw, 100cqh)",
   } as const;
   const videoStyle = {
-    width: "min(760px, 96%)",
+    width: "min(760px, 100cqw, calc(100cqh * 16 / 9))",
     aspectRatio: "16 / 9",
-    maxHeight: "min(54vw, calc(100dvh - 13rem))",
   } as const;
   const useVideoFrame = mode === "youtube" || mode === "video";
 
   return (
-    <section className="flex h-full max-h-full w-full max-w-[min(100%,520px)] flex-col justify-between overflow-hidden rounded-xl border border-zinc-700/80 bg-gradient-to-b from-zinc-900 via-zinc-900 to-zinc-950 px-2.5 py-2.5 text-zinc-100 shadow-md sm:px-3 sm:py-3">
+    <section className="flex h-full max-h-full w-full max-w-[min(100%,540px)] flex-col justify-between overflow-hidden border border-line bg-faint px-3 py-3 text-paper sm:px-4 sm:py-4">
       {mode === "cover-audio" || mode === "audio" ? (
         <audio
           ref={audioRef}
@@ -628,35 +659,29 @@ function PlaybackDeck({
         />
       ) : null}
 
-      <div>
-        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-violet-300/90">
-          Now playing
-        </p>
-        <h2 className="mt-1 line-clamp-2 break-words text-sm font-semibold leading-snug sm:text-base">
-          {entry.work.title}
-        </h2>
-        <p className="mt-0.5 truncate text-xs text-violet-200/90 sm:text-sm">
-          {entry.clip.label}
-        </p>
-        <p className="mt-1 text-[10px] text-zinc-400">
-          {entry.work.kind} · {entry.work.year} · {flatIndex + 1} / {queueLength}
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h2 className="line-clamp-2 font-serif text-lg leading-snug break-words sm:text-xl">
+            {entry.work.title}
+          </h2>
+          <p className="mt-0.5 truncate text-sm text-mute">{entry.clip.label}</p>
+        </div>
+        <p className="shrink-0 pt-1 text-xs text-mute tabular-nums">
+          {flatIndex + 1}／{queueLength}
         </p>
       </div>
 
-      <div className="my-2 flex shrink-0 justify-center sm:my-3">
+      <div className="my-3 flex min-h-[120px] flex-1 items-center justify-center [container-type:size]">
         <div
-          className="relative shrink-0 overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10"
+          className="relative shrink-0 overflow-hidden bg-ink"
           style={useVideoFrame ? videoStyle : squareStyle}
         >
-          {useVideoFrame ? (
-            <div className="pointer-events-none absolute inset-0 bg-black" aria-hidden />
-          ) : null}
           {mode === "youtube" && embedSrc ? (
             <iframe
               key={`${embedSrc}-${autoplayTick}`}
               title={entry.clip.label}
               src={embedSrc}
-              className={`bg-black ${useVideoFrame ? "absolute inset-0 h-full w-full" : "h-full w-full"}`}
+              className="absolute inset-0 h-full w-full bg-black"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
             />
@@ -675,7 +700,7 @@ function PlaybackDeck({
               />
               {entry.clip.glassImageUrl ? (
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20 p-5">
-                  <div className="max-h-[78%] max-w-[82%] rounded-2xl border border-white/30 bg-white/15 p-3 shadow-2xl backdrop-blur-xl ring-1 ring-white/25">
+                  <div className="max-h-[78%] max-w-[82%] border border-white/25 bg-white/10 p-3 backdrop-blur-xl">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={entry.clip.glassImageUrl}
@@ -689,30 +714,31 @@ function PlaybackDeck({
           ) : null}
 
           {mode === "cover-audio" && entry.clip.coverImageUrl ? (
-            <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={entry.clip.coverImageUrl}
-                alt=""
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-              <div
-                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent"
-                aria-hidden
-              />
-            </>
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={entry.clip.coverImageUrl}
+              alt=""
+              className={`absolute inset-0 h-full w-full object-cover grayscale transition-opacity duration-700 ${
+                isPlaying ? "opacity-25" : "opacity-60"
+              }`}
+            />
           ) : null}
 
-          {mode === "audio" ? (
-            <div
-              className="flex h-full w-full items-center justify-center bg-gradient-to-br from-violet-600/50 via-fuchsia-600/30 to-cyan-600/40"
-              aria-hidden
-            />
+          {showsRing ? (
+            <div className="absolute inset-0">
+              <ParticleRing
+                getSpectrum={getSpectrum}
+                trail={mode === "audio"}
+                radius={0.27}
+                density={110}
+                respectReducedMotion={false}
+              />
+            </div>
           ) : null}
 
           {mode === "none" ? (
             <div
-              className="flex h-full w-full items-center justify-center bg-zinc-800 text-xs text-zinc-500"
+              className="flex h-full w-full items-center justify-center text-xs text-mute"
               aria-hidden
             >
               無預覽
@@ -722,16 +748,16 @@ function PlaybackDeck({
             <button
               type="button"
               onClick={() => void togglePlay()}
-              className="absolute inset-0 z-[5] cursor-pointer rounded-2xl border-0 bg-transparent p-0 outline-none focus-visible:ring-2 focus-visible:ring-violet-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900"
+              className="absolute inset-0 z-[5] cursor-pointer border-0 bg-transparent p-0"
               aria-label={isPlaying ? "暫停" : "播放"}
             />
           ) : null}
         </div>
       </div>
 
-      <div className="space-y-3 sm:space-y-4">
+      <div className="space-y-3">
         {mode === "youtube" ? (
-          <p className="text-center text-[10px] leading-relaxed text-zinc-500">
+          <p className="text-center text-xs leading-relaxed text-mute">
             進度與播放請在上方 YouTube 影片內操作。
           </p>
         ) : (
@@ -739,40 +765,47 @@ function PlaybackDeck({
             <div
               ref={trackRef}
               role="slider"
+              tabIndex={canSeek ? 0 : -1}
+              aria-label="播放進度"
               aria-valuemin={0}
-              aria-valuemax={duration > 0 ? duration : 0}
-              aria-valuenow={progress}
+              aria-valuemax={duration > 0 ? Math.round(duration) : 0}
+              aria-valuenow={Math.round(progress)}
+              aria-valuetext={`${formatTime(progress)}／${formatTime(duration)}`}
               aria-disabled={!canSeek}
               onPointerDown={onBarPointerDown}
               onPointerMove={onBarPointerMove}
               onPointerUp={onBarPointerUp}
               onPointerCancel={onBarPointerUp}
-              className={`relative h-3 w-full touch-none rounded-full bg-zinc-700/90 ${
-                canSeek
-                  ? "cursor-pointer"
-                  : "cursor-not-allowed opacity-60"
+              onKeyDown={onBarKeyDown}
+              className={`group relative flex h-4 w-full touch-none items-center ${
+                canSeek ? "cursor-pointer" : "cursor-not-allowed opacity-50"
               }`}
             >
+              <div className="h-px w-full bg-line" />
               <div
-                className={`pointer-events-none absolute inset-y-0 left-0 rounded-full bg-violet-400 ${
+                className={`pointer-events-none absolute left-0 h-px bg-paper ${
                   barDragging ? "" : "transition-[width] duration-100"
                 }`}
                 style={{ width: `${pct}%` }}
               />
+              <div
+                className="pointer-events-none absolute h-2.5 w-px -translate-x-1/2 bg-paper"
+                style={{ left: `${pct}%` }}
+              />
             </div>
-            <div className="mt-2 flex justify-between font-mono text-xs tabular-nums text-zinc-400">
+            <div className="mt-1 flex justify-between text-xs text-mute tabular-nums">
               <span>{formatTime(progress)}</span>
               <span>{formatTime(duration)}</span>
             </div>
           </div>
         )}
 
-        <div className="flex items-center justify-center gap-2 sm:gap-3">
+        <div className="flex items-center justify-center gap-6">
           <button
             type="button"
             onClick={onPrev}
             disabled={flatIndex <= 0}
-            className="shrink-0 whitespace-nowrap rounded-full border border-zinc-600 px-2.5 py-1.5 text-[10px] font-medium text-zinc-200 hover:bg-zinc-800 disabled:opacity-30 sm:px-3.5 sm:text-xs"
+            className="shrink-0 text-sm text-mute transition-colors hover:text-paper disabled:opacity-30 disabled:hover:text-mute"
           >
             上一段
           </button>
@@ -780,23 +813,32 @@ function PlaybackDeck({
             type="button"
             onClick={togglePlay}
             disabled={!canPlayLocal}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-sm font-bold text-zinc-900 shadow-md hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-35 sm:h-11 sm:w-11 sm:text-base"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-paper text-paper transition-colors hover:bg-paper hover:text-ink disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-paper"
             aria-label={isPlaying ? "暫停" : "播放"}
           >
-            {isPlaying ? "❚❚" : "▶"}
+            {isPlaying ? (
+              <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
+                <rect x="2" y="1" width="2.5" height="10" fill="currentColor" />
+                <rect x="7.5" y="1" width="2.5" height="10" fill="currentColor" />
+              </svg>
+            ) : (
+              <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden>
+                <path d="M3 1 L11 6 L3 11 Z" fill="currentColor" />
+              </svg>
+            )}
           </button>
           <button
             type="button"
             onClick={onNext}
             disabled={flatIndex >= queueLength - 1}
-            className="shrink-0 whitespace-nowrap rounded-full border border-zinc-600 px-2.5 py-1.5 text-[10px] font-medium text-zinc-200 hover:bg-zinc-800 disabled:opacity-30 sm:px-3.5 sm:text-xs"
+            className="shrink-0 text-sm text-mute transition-colors hover:text-paper disabled:opacity-30 disabled:hover:text-mute"
           >
             下一段
           </button>
         </div>
 
         {!canPlay && (
-          <p className="text-center text-xs text-zinc-500">此項目尚無音檔。</p>
+          <p className="text-center text-xs text-mute">此項目尚無音檔。</p>
         )}
       </div>
     </section>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Noto_Sans_TC, Noto_Serif_TC } from "next/font/google";
 import { SiteNav } from "./components/SiteNav";
 import "./globals.css";
 
@@ -8,14 +8,21 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const notoSans = Noto_Sans_TC({
+  variable: "--font-noto-sans",
+  weight: ["400", "500"],
+  preload: false,
+});
+
+const notoSerif = Noto_Serif_TC({
+  variable: "--font-noto-serif",
+  weight: ["400", "700"],
+  preload: false,
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "許兆豐 Nick Hsu｜聲音 · 配樂 · 設計",
+    default: "許兆豐 Nick Hsu｜聲音、配樂與設計",
     template: "%s｜Nick Hsu",
   },
   description:
@@ -30,16 +37,20 @@ export default function RootLayout({
   return (
     <html
       lang="zh-Hant"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${notoSans.variable} ${notoSerif.variable} h-full bg-ink antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-zinc-100 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50">
+      <body className="flex min-h-full flex-col bg-ink text-paper">
         <SiteNav />
         <div className="flex-1">{children}</div>
-        <footer className="border-t border-zinc-200/80 bg-zinc-100/90 py-6 text-center text-xs text-zinc-500 dark:border-zinc-800/80 dark:bg-zinc-950/90 dark:text-zinc-400">
-          <p>
-            uniqueee3190@gmail.com · Welcome Georgie
-          </p>
-          <p className="mt-1">© {new Date().getFullYear()} Nick Hsu</p>
+        <footer className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-t border-line px-5 py-6 text-xs text-mute sm:px-8 lg:px-12">
+          <a
+            href="mailto:uniqueee3190@gmail.com"
+            className="transition-colors hover:text-paper"
+          >
+            uniqueee3190@gmail.com
+          </a>
+          <p>Welcome Georgie</p>
+          <p>© {new Date().getFullYear()} Nick Hsu</p>
         </footer>
       </body>
     </html>

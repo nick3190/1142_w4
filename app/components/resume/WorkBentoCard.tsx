@@ -18,44 +18,36 @@ export function WorkBentoCard({ work, href, className = "" }: WorkBentoCardProps
       href={linkHref}
       target={isExternal ? "_blank" : undefined}
       rel={isExternal ? "noopener noreferrer" : undefined}
-      className={`group relative flex flex-col overflow-hidden rounded-2xl border border-zinc-200/80 bg-white/70 p-0 shadow-sm outline-none backdrop-blur-sm transition duration-300 ease-out hover:-translate-y-1 hover:border-violet-400/40 hover:shadow-xl hover:shadow-violet-500/10 focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-100 dark:border-zinc-800/80 dark:bg-zinc-950/60 dark:hover:border-violet-500/35 dark:hover:shadow-violet-500/15 dark:focus-visible:ring-offset-zinc-950 ${className}`}
+      className={`group flex flex-col ${className}`}
     >
       <div
-        className={`relative aspect-[16/10] w-full overflow-hidden transition duration-500 group-hover:scale-[1.03] ${workCoverClass(work.accent)}`}
+        className={`relative aspect-[16/10] w-full overflow-hidden ${workCoverClass(work.accent)}`}
       >
         {work.coverImageUrl ? (
           <Image
             src={work.coverImageUrl}
             alt={work.title}
             fill
-            className="object-cover"
+            className="object-cover grayscale transition duration-500 ease-out group-hover:grayscale-0 motion-reduce:transition-none"
             sizes="(max-width: 640px) 100vw, 50vw"
           />
         ) : null}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.35),transparent_55%)] opacity-70 transition duration-500 group-hover:opacity-100 dark:bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.12),transparent_55%)]" />
-        <span className="absolute bottom-3 left-3 z-10 rounded-full bg-black/45 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white backdrop-blur-sm">
-          {work.year}
-        </span>
       </div>
-      <div className="flex min-w-0 flex-1 flex-col gap-2 p-5">
-        <div>
-          <h2 className="line-clamp-2 text-base font-semibold tracking-tight text-zinc-900 transition group-hover:text-violet-700 dark:text-zinc-50 dark:group-hover:text-violet-300">
-            {work.title}
-          </h2>
-          {work.subtitle && (
-            <p className="mt-0.5 line-clamp-2 text-xs text-zinc-500 dark:text-zinc-400">
-              {work.subtitle}
-            </p>
-          )}
-        </div>
-        <p className="line-clamp-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
-          {work.summary}
-        </p>
-        <span className="mt-auto inline-flex items-center gap-1 text-xs font-medium text-violet-600 opacity-0 transition duration-300 group-hover:translate-x-0.5 group-hover:opacity-100 dark:text-violet-400">
-          作品介紹
-          <span aria-hidden>→</span>
-        </span>
+      <div className="mt-3 flex items-baseline justify-between gap-4">
+        <h2 className="line-clamp-2 text-base text-paper underline-offset-4 group-hover:underline">
+          {work.title}
+        </h2>
+        <span className="shrink-0 text-xs text-mute tabular-nums">{work.year}</span>
       </div>
+      {work.subtitle && (
+        <p className="mt-0.5 line-clamp-2 text-sm text-mute">{work.subtitle}</p>
+      )}
+      <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-paper/75">
+        {work.summary}
+      </p>
+      {isExternal ? (
+        <span className="mt-2 text-xs text-mute">外部連結</span>
+      ) : null}
     </Link>
   );
 }

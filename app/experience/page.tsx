@@ -86,20 +86,20 @@ const otherRoles: Role[] = [
 
 function RoleList({ items }: { items: Role[] }) {
   return (
-    <ol className="space-y-6">
+    <ol className="space-y-8">
       {items.map((item) => (
         <li
           key={item.org + item.period}
-          className="border-l-2 border-violet-400/60 pl-4 dark:border-violet-500/50"
+          className="grid gap-1 sm:grid-cols-[9rem_1fr] sm:gap-6"
         >
-          <p className="font-semibold text-zinc-900 dark:text-zinc-50">
-            {item.org}
-          </p>
-          <p className="mt-0.5 text-sm text-violet-700 dark:text-violet-300">
-            {item.role}
-          </p>
-          <p className="mt-1 text-xs text-zinc-500">{item.period}</p>
-          <p className="mt-2 text-sm leading-relaxed">{item.detail}</p>
+          <p className="text-sm text-mute tabular-nums">{item.period}</p>
+          <div>
+            <p className="text-paper">{item.org}</p>
+            <p className="mt-0.5 text-sm text-mute">{item.role}</p>
+            <p className="mt-2 max-w-[38em] text-sm leading-relaxed text-paper/80">
+              {item.detail}
+            </p>
+          </div>
         </li>
       ))}
     </ol>
@@ -109,14 +109,14 @@ function RoleList({ items }: { items: Role[] }) {
 export default function ExperiencePage() {
   return (
     <main className="min-h-full">
-      <div className="mx-auto max-w-6xl space-y-6 px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-        <BentoCard eyebrow="經歷" title="專案計畫">
+      <div className="max-w-5xl space-y-14 px-5 py-10 sm:px-8 lg:px-12 lg:py-16">
+        <BentoCard title="專案計畫">
           <RoleList items={projectRoles} />
         </BentoCard>
-        <BentoCard eyebrow="經歷" title="展務工作">
+        <BentoCard title="展務工作">
           <RoleList items={exhibitRoles} />
         </BentoCard>
-        <BentoCard eyebrow="經歷" title="其他">
+        <BentoCard title="其他">
           <RoleList items={otherRoles} />
         </BentoCard>
       </div>

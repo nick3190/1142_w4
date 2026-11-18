@@ -1,21 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ParticleRing } from "@/app/components/ParticleRing";
 import { GeorgieHero } from "@/app/components/home/GeorgieHero";
 import { getGeorgieFinalePath, getGeorgieRandomPool } from "@/lib/georgie-images";
 import { wangHongTeeImagePath } from "@/lib/portfolio-data";
+import { siteSections } from "@/lib/site-sections";
 
 const SHOWREEL_VIMEO_ID = "1120960224";
-
-const sidebarLinks = [
-  { href: "/about_me", title: "關於我", desc: "學歷、專長與語言" },
-  { href: "/experience", title: "經歷", desc: "展覽、計畫與展場工作" },
-  { href: "/audio", title: "配樂與聲音", desc: "播放清單與專案介紹" },
-  { href: "/dynamic_video", title: "動態影像", desc: "影像作品與節目企劃" },
-  { href: "/graphic_design", title: "平面設計", desc: "主視覺與印刷／數位" },
-  { href: "/web_design", title: "網頁設計", desc: "網站與互動網頁" },
-  { href: "/device_design", title: "裝置設計", desc: "聲響與新媒體裝置" },
-  { href: "/mixing", title: "混音", desc: "影視後期與收音" },
-] as const;
 
 const featuredWorks = [
   {
@@ -27,7 +18,7 @@ const featuredWorks = [
   },
   {
     title: "網紅 T 恤設計",
-    subtitle: "平面設計 · 亞洲統神主題",
+    subtitle: "平面設計，亞洲統神主題",
     href: "/graphic_design/wang-hong-tee",
     imageSrc: wangHongTeeImagePath,
     remote: false,
@@ -41,175 +32,119 @@ const featuredWorks = [
   },
 ] as const;
 
+function SectionList({ className = "" }: { className?: string }) {
+  return (
+    <nav aria-label="主要頁面" className={className}>
+      <ul className="grid grid-cols-2 gap-x-8 gap-y-3 sm:grid-cols-4 lg:grid-cols-1 lg:gap-y-1.5">
+        {siteSections.map((item) => (
+          <li key={item.href}>
+            <Link
+              href={item.href}
+              className="group flex flex-col py-1 lg:flex-row lg:items-baseline lg:justify-end lg:gap-4"
+            >
+              <span className="order-2 text-xs text-mute opacity-100 transition-opacity lg:order-1 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-visible:opacity-100">
+                {item.desc}
+              </span>
+              <span className="order-1 text-base text-paper transition-colors group-hover:text-mute lg:order-2 lg:text-lg">
+                {item.title}
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
+
 export default function Home() {
   const georgiePoolPaths = getGeorgieRandomPool();
   const georgieFinalePath = getGeorgieFinalePath();
 
   return (
-    <main className="min-h-full">
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-        <div className="mb-4 lg:hidden">
-          <nav
-            aria-label="手機主要選單"
-            className="flex gap-2 overflow-x-auto rounded-2xl border border-zinc-200/80 bg-white/90 p-2 shadow-sm dark:border-zinc-800/80 dark:bg-zinc-950/80"
-          >
-            {sidebarLinks.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="shrink-0 rounded-full border border-zinc-200/80 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
-              >
-                {item.title}
-              </Link>
-            ))}
-          </nav>
+    <main className="min-h-full bg-ink">
+      <section className="relative h-[100svh] min-h-[600px] overflow-hidden">
+        <div className="absolute inset-0">
+          <ParticleRing interactive radius={0.3} centerY={0.42} />
         </div>
 
-        <div className="flex flex-col gap-6 lg:block">
-          <div>
-            <aside className="hidden w-full flex-col gap-4 lg:fixed lg:left-[max(1rem,calc(50vw-36rem+1rem))] lg:top-8 lg:z-30 lg:flex lg:w-[272px] lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
-              <div className="rounded-3xl border border-zinc-200/80 bg-white/90 p-5 shadow-sm dark:border-zinc-800/80 dark:bg-zinc-950/80">
-                <div className="flex items-center gap-4">
-                  <Image
-                    src="/self_pic.png"
-                    alt=""
-                    width={56}
-                    height={56}
-                    className="h-14 w-14 rounded-full object-cover"
-                  />
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-                      許兆豐
-                    </p>
-                    <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
-                      Nick Hsu
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-4 flex gap-2">
-                  <a
-                    href="mailto:uniqueee3190@gmail.com"
-                    className="flex h-9 min-w-[2.25rem] items-center justify-center rounded-full border border-zinc-200 px-2 text-[10px] font-semibold text-zinc-600 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
-                  >
-                    Mail
-                  </a>
-                </div>
-              </div>
-
-              <nav className="flex flex-col gap-3" aria-label="主要頁面">
-                {sidebarLinks.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="flex items-start justify-between gap-3 rounded-3xl border border-zinc-200/80 bg-white/90 px-4 py-3 shadow-sm hover:border-violet-400/40 hover:shadow-md dark:border-zinc-800/80 dark:bg-zinc-950/80 dark:hover:border-violet-500/35"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-                        {item.title}
-                      </p>
-                      <p className="mt-0.5 truncate text-xs text-zinc-500 dark:text-zinc-400">
-                        {item.desc}
-                      </p>
-                    </div>
-                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-300 dark:bg-zinc-600" />
-                  </Link>
-                ))}
-              </nav>
-            </aside>
-          </div>
-
-          <div className="space-y-6 lg:ml-[300px]">
-            <section className="rounded-3xl border border-zinc-200/80 bg-white/90 p-8 shadow-sm dark:border-zinc-800/80 dark:bg-zinc-950/80 sm:p-10 lg:p-12">
-              <GeorgieHero
-                georgiePoolPaths={georgiePoolPaths}
-                finalePath={georgieFinalePath}
-              />
-
-              <section id="showreel" className="mt-10 text-left">
-                <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-                  Showreel
-                </h2>
-                <div className="mt-4 aspect-video w-full overflow-hidden rounded-2xl border border-zinc-200/80 bg-zinc-100 dark:border-zinc-800/80 dark:bg-zinc-900/80">
-                  <iframe
-                    title="Showreel"
-                    src={`https://player.vimeo.com/video/${SHOWREEL_VIMEO_ID}`}
-                    allow="autoplay; fullscreen; picture-in-picture"
-                    allowFullScreen
-                    className="h-full w-full"
-                  />
-                </div>
-                <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-                  <a
-                    href="https://vimeo.com/1120960224?fl=ip&fe=ec"
-                    className="text-violet-600 underline hover:text-violet-500 dark:text-violet-400"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    在 Vimeo 開啟此影片
-                  </a>
-                </p>
-              </section>
-            </section>
-
-            <section
-              id="featured"
-              className="relative mt-2 min-h-[320px] overflow-hidden rounded-3xl border border-zinc-200/60 shadow-lg dark:border-zinc-700/60"
+        <div className="pointer-events-none relative z-10 flex h-full flex-col justify-between px-5 py-5 sm:px-8 sm:py-7 lg:px-12 lg:py-10">
+          <header className="pointer-events-auto flex items-baseline justify-between gap-4 text-sm">
+            <span className="text-mute">聲音、配樂與設計</span>
+            <a
+              href="mailto:uniqueee3190@gmail.com"
+              className="text-mute transition-colors hover:text-paper"
             >
-              <div
-                className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: "url('/home-portfolio-bg.png')" }}
-                aria-hidden
-              />
-              <div className="absolute inset-0 bg-zinc-950/45" aria-hidden />
-              <div className="relative z-10 flex flex-col gap-6 p-6 sm:p-8 lg:p-10">
-                <header>
-                  <p className="text-xs font-semibold uppercase tracking-widest text-white/70">
-                    Featured
-                  </p>
-                  <h2 className="mt-2 text-xl font-semibold text-white sm:text-2xl">
-                    精選作品
-                  </h2>
-                </header>
-                <div className="flex gap-3 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:gap-4 sm:overflow-visible lg:grid-cols-3">
-                  {featuredWorks.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className="group relative block w-[220px] shrink-0 overflow-hidden rounded-2xl border border-white/20 bg-zinc-900/40 shadow-xl ring-1 ring-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:w-auto"
-                    >
-                      <div className="relative aspect-[3/2] w-full overflow-hidden sm:aspect-[4/3]">
-                        <Image
-                          src={item.imageSrc}
-                          alt=""
-                          fill
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                          className="object-cover transition duration-300 ease-out group-hover:scale-[1.03] group-hover:blur-sm motion-reduce:group-hover:blur-none"
-                          unoptimized={item.remote}
-                        />
-                        <div
-                          className="absolute inset-0 bg-black/0 transition duration-300 group-hover:bg-black/35 group-active:bg-black/30"
-                          aria-hidden
-                        />
-                        <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
-                          <span className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-zinc-900 shadow-lg">
-                            點擊觀看
-                          </span>
-                        </div>
-                      </div>
-                      <div className="border-t border-white/10 bg-black/25 px-4 py-3 backdrop-blur-md">
-                        <h3 className="truncate text-base font-semibold text-white">
-                          {item.title}
-                        </h3>
-                        <p className="mt-1 truncate text-xs text-white/80">{item.subtitle}</p>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </section>
+              uniqueee3190@gmail.com
+            </a>
+          </header>
+
+          <div className="pointer-events-auto flex items-end justify-between gap-10">
+            <GeorgieHero
+              georgiePoolPaths={georgiePoolPaths}
+              finalePath={georgieFinalePath}
+            />
+            <SectionList className="hidden shrink-0 lg:block" />
           </div>
         </div>
-      </div>
+      </section>
+
+      <SectionList className="border-t border-line px-5 py-8 sm:px-8 lg:hidden" />
+
+      <section
+        id="showreel"
+        className="border-t border-line px-5 py-14 sm:px-8 lg:grid lg:grid-cols-[14rem_1fr] lg:gap-12 lg:px-12 lg:py-20"
+      >
+        <div>
+          <h2 className="font-serif text-2xl text-paper">Showreel</h2>
+          <p className="mt-2 max-w-[16rem] text-sm leading-relaxed text-mute">
+            近年配樂、聲音設計與影像作品的剪輯。
+          </p>
+          <a
+            href="https://vimeo.com/1120960224?fl=ip&fe=ec"
+            className="mt-4 inline-block text-sm text-paper underline decoration-line underline-offset-4 transition-colors hover:decoration-paper"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            在 Vimeo 開啟
+          </a>
+        </div>
+        <div className="mt-6 aspect-video w-full overflow-hidden bg-faint lg:mt-0">
+          <iframe
+            title="Showreel"
+            src={`https://player.vimeo.com/video/${SHOWREEL_VIMEO_ID}?color=ededed`}
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowFullScreen
+            className="h-full w-full"
+          />
+        </div>
+      </section>
+
+      <section
+        id="featured"
+        className="border-t border-line px-5 py-14 sm:px-8 lg:grid lg:grid-cols-[14rem_1fr] lg:gap-12 lg:px-12 lg:py-20"
+      >
+        <h2 className="font-serif text-2xl text-paper">精選作品</h2>
+        <ul className="mt-6 grid gap-x-6 gap-y-10 sm:grid-cols-3 lg:mt-0">
+          {featuredWorks.map((item) => (
+            <li key={item.href}>
+              <Link href={item.href} className="group block">
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-faint">
+                  <Image
+                    src={item.imageSrc}
+                    alt=""
+                    fill
+                    sizes="(max-width: 640px) 100vw, 33vw"
+                    className="object-cover grayscale transition duration-500 ease-out group-hover:grayscale-0 motion-reduce:transition-none"
+                    unoptimized={item.remote}
+                  />
+                </div>
+                <h3 className="mt-3 text-base text-paper">{item.title}</h3>
+                <p className="mt-0.5 text-sm text-mute">{item.subtitle}</p>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </section>
     </main>
   );
 }

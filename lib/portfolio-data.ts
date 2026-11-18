@@ -406,16 +406,13 @@ export const mixingWorks: GridWork[] = [
   },
 ];
 
-const accentGradients: Record<
-  Accent,
-  string
-> = {
-  violet: "from-violet-500/35 via-fuchsia-500/20 to-transparent",
-  cyan: "from-cyan-500/35 via-teal-500/20 to-transparent",
-  amber: "from-amber-500/40 via-orange-500/20 to-transparent",
-  rose: "from-rose-500/35 via-pink-500/20 to-transparent",
-  emerald: "from-emerald-500/35 via-lime-500/15 to-transparent",
-  sky: "from-sky-500/35 via-blue-500/20 to-transparent",
+const accentGradients: Record<Accent, string> = {
+  violet: "from-neutral-800 via-neutral-900 to-black",
+  cyan: "from-neutral-700 via-neutral-900 to-black",
+  amber: "from-neutral-600 via-neutral-900 to-black",
+  rose: "from-neutral-800 via-black to-neutral-900",
+  emerald: "from-neutral-700 via-black to-neutral-900",
+  sky: "from-neutral-900 via-neutral-800 to-black",
 };
 
 export function workCoverClass(accent: Accent) {
