@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ParticleRing } from "@/app/components/ParticleRing";
+import { Visualizer } from "@/app/components/Visualizer";
+import { SectionList } from "@/app/components/home/SectionList";
 import { GeorgieHero } from "@/app/components/home/GeorgieHero";
 import { getGeorgieFinalePath, getGeorgieRandomPool } from "@/lib/georgie-images";
 import { wangHongTeeImagePath } from "@/lib/portfolio-data";
-import { siteSections } from "@/lib/site-sections";
 
 const SHOWREEL_VIMEO_ID = "1120960224";
 
@@ -32,40 +32,25 @@ const featuredWorks = [
   },
 ] as const;
 
-function SectionList({ className = "" }: { className?: string }) {
-  return (
-    <nav aria-label="主要頁面" className={className}>
-      <ul className="grid grid-cols-2 gap-x-8 gap-y-3 sm:grid-cols-4 lg:grid-cols-1 lg:gap-y-1.5">
-        {siteSections.map((item) => (
-          <li key={item.href}>
-            <Link
-              href={item.href}
-              className="group flex flex-col py-1 lg:flex-row lg:items-baseline lg:justify-end lg:gap-4"
-            >
-              <span className="order-2 text-xs text-mute opacity-100 transition-opacity lg:order-1 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-visible:opacity-100">
-                {item.desc}
-              </span>
-              <span className="order-1 text-base text-paper transition-colors group-hover:text-mute lg:order-2 lg:text-lg">
-                {item.title}
-              </span>
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </nav>
-  );
-}
-
 export default function Home() {
   const georgiePoolPaths = getGeorgieRandomPool();
   const georgieFinalePath = getGeorgieFinalePath();
 
   return (
-    <main className="min-h-full bg-ink">
+    <main className="relative min-h-full">
+      {/* 聲環固定在畫面中央當背景，捲動時跟著轉 */}
+      <div className="pointer-events-none fixed inset-0 -z-10" aria-hidden>
+        <Visualizer
+          mode="ring"
+          interactive
+          scrollSpin
+          idleSpeed={0.05}
+          radius={0.3}
+          centerY={0.46}
+        />
+      </div>
+
       <section className="relative h-[100svh] min-h-[600px] overflow-hidden">
-        <div className="absolute inset-0">
-          <ParticleRing interactive radius={0.3} centerY={0.42} />
-        </div>
 
         <div className="pointer-events-none relative z-10 flex h-full flex-col justify-between px-5 py-5 sm:px-8 sm:py-7 lg:px-12 lg:py-10">
           <header className="pointer-events-auto flex items-baseline justify-between gap-4 text-sm">
@@ -88,11 +73,11 @@ export default function Home() {
         </div>
       </section>
 
-      <SectionList className="border-t border-line px-5 py-8 sm:px-8 lg:hidden" />
+      <SectionList className="border-t border-line bg-black/50 px-5 py-8 sm:px-8 lg:hidden" />
 
       <section
         id="showreel"
-        className="border-t border-line px-5 py-14 sm:px-8 lg:grid lg:grid-cols-[14rem_1fr] lg:gap-12 lg:px-12 lg:py-20"
+        className="border-t border-line bg-black/45 px-5 py-14 sm:px-8 lg:grid lg:grid-cols-[14rem_1fr] lg:gap-12 lg:px-12 lg:py-20"
       >
         <div>
           <h2 className="font-serif text-2xl text-paper">Showreel</h2>
@@ -121,7 +106,7 @@ export default function Home() {
 
       <section
         id="featured"
-        className="border-t border-line px-5 py-14 sm:px-8 lg:grid lg:grid-cols-[14rem_1fr] lg:gap-12 lg:px-12 lg:py-20"
+        className="border-t border-line bg-black/45 px-5 py-14 sm:px-8 lg:grid lg:grid-cols-[14rem_1fr] lg:gap-12 lg:px-12 lg:py-20"
       >
         <h2 className="font-serif text-2xl text-paper">精選作品</h2>
         <ul className="mt-6 grid gap-x-6 gap-y-10 sm:grid-cols-3 lg:mt-0">

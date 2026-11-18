@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { emitFromRect } from "@/lib/particle-fx";
 import type { GridWork } from "@/lib/portfolio-data";
 import { workCoverClass } from "@/lib/portfolio-data";
 
@@ -32,6 +33,14 @@ function isLocalVideo(url: string): boolean {
 
 export function DynamicVideoGallery({ works }: DynamicVideoGalleryProps) {
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+
+  // 關閉：先從面板位置炸開粒子，再移除面板
+  const close = useCallback(() => {
+    const el = panelRef.current;
+    if (el) emitFromRect(el.getBoundingClientRect(), "scatter");
+    setActiveSlug(null);
+  }, []);
 
   const activeWork = useMemo(
     () => works.find((work) => work.slug === activeSlug) ?? null,
@@ -41,11 +50,21 @@ export function DynamicVideoGallery({ works }: DynamicVideoGalleryProps) {
   useEffect(() => {
     if (!activeWork) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setActiveSlug(null);
+      if (event.key === "Escape") close();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [activeWork]);
+  }, [activeWork, close]);
+
+  // 打開：粒子從四周聚攏到面板輪廓
+  useEffect(() => {
+    if (!activeSlug) return;
+    const id = requestAnimationFrame(() => {
+      const el = panelRef.current;
+      if (el) emitFromRect(el.getBoundingClientRect(), "gather");
+    });
+    return () => cancelAnimationFrame(id);
+  }, [activeSlug]);
 
   useEffect(() => {
     if (!activeWork) return;
@@ -99,14 +118,15 @@ export function DynamicVideoGallery({ works }: DynamicVideoGalleryProps) {
 
       {activeWork ? (
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/85 p-3 sm:items-center sm:p-6"
+          className="modal-backdrop fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/85 p-3 sm:items-center sm:p-6"
           role="dialog"
           aria-modal="true"
           aria-label={activeWork.title}
-          onClick={() => setActiveSlug(null)}
+          onClick={close}
         >
           <div
-            className="max-h-[92vh] w-full max-w-4xl overflow-y-auto border border-line bg-ink p-5 sm:p-8"
+            ref={panelRef}
+            className="modal-panel max-h-[92vh] w-full max-w-4xl overflow-y-auto border border-line bg-ink p-5 sm:p-8"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
@@ -126,7 +146,7 @@ export function DynamicVideoGallery({ works }: DynamicVideoGalleryProps) {
               </div>
               <button
                 type="button"
-                onClick={() => setActiveSlug(null)}
+                onClick={close}
                 className="text-sm text-mute transition-colors hover:text-paper"
               >
                 關閉

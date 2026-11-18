@@ -10,6 +10,8 @@ export type AudioClip = {
    * 與影片 `url` 並用：影片滿版背景循環，此圖置中並帶毛玻璃底。
    */
   glassImageUrl?: string;
+  /** 秒；YouTube 等無法事先得知者留空 */
+  duration?: number;
 };
 
 /** 聲噪立方等含中文檔名的公開路徑 */
@@ -26,7 +28,9 @@ export type AudioIntroSection = {
 export type AudioTrack = {
   slug: string;
   year: string;
-  kind: "配樂" | "聲音設計";
+  kind: "配樂" | "聲音設計" | "錄音混音";
+  /** 置頂（不論年份） */
+  pinned?: boolean;
   title: string;
   subtitle?: string;
   description: string;
@@ -36,15 +40,65 @@ export type AudioTrack = {
 
 export const audioTracks: AudioTrack[] = [
   {
+    slug: "xanadu",
+    year: "2026",
+    kind: "配樂",
+    title: "《Xanadu》",
+    subtitle: "沉浸式配樂",
+    description: "沉浸式配樂。",
+    clips: [
+      {
+        label: "Xanadu Immersive Score",
+        url: "/portfolio/xanadu/xanadu_immersive_score.mp3",
+        duration: 134,
+      },
+    ],
+  },
+  {
+    slug: "ta-fang-embers",
+    year: "2026",
+    kind: "配樂",
+    title: "《他方：餘燼重編》",
+    description: "配樂重編，共十一段。",
+    clips: [
+      { label: "Intro", url: "/portfolio/ta-fang-embers/01_intro.mp3", duration: 111 },
+      { label: "Dusts", url: "/portfolio/ta-fang-embers/02_dusts.mp3", duration: 67 },
+      { label: "Traveling", url: "/portfolio/ta-fang-embers/03_traveling.mp3", duration: 56 },
+      { label: "Cruel King", url: "/portfolio/ta-fang-embers/04_cruel_king.mp3", duration: 50 },
+      { label: "Drunk King", url: "/portfolio/ta-fang-embers/05_drunk_king.mp3", duration: 96 },
+      { label: "Hunting", url: "/portfolio/ta-fang-embers/06_hunting.mp3", duration: 55 },
+      { label: "Garden Broken", url: "/portfolio/ta-fang-embers/07_garden_broken.mp3", duration: 68 },
+      { label: "Garden Gift", url: "/portfolio/ta-fang-embers/08_garden_gift.mp3", duration: 96 },
+      { label: "Military Parade", url: "/portfolio/ta-fang-embers/09_military_parade.mp3", duration: 73 },
+      { label: "Remain Ending", url: "/portfolio/ta-fang-embers/10_remain_ending.mp3", duration: 154 },
+      { label: "Delete Ending", url: "/portfolio/ta-fang-embers/11_delete_ending.mp3", duration: 160 },
+    ],
+  },
+  {
+    slug: "mobius",
+    year: "2026",
+    kind: "錄音混音",
+    pinned: true,
+    title: "《Möbius》",
+    subtitle: "專輯錄音、混音",
+    description: "專輯錄音與混音。",
+    clips: [
+      { label: "First Day", url: "/portfolio/mobius/first_day.mp3", duration: 282 },
+      { label: "Wandering", url: "/portfolio/mobius/wandering.mp3", duration: 204 },
+      { label: "Twisted, Broken", url: "/portfolio/mobius/twisted_broken.mp3", duration: 224 },
+      { label: "Outro", url: "/portfolio/mobius/outro.mp3", duration: 38 },
+    ],
+  },
+  {
     slug: "fang-si-fang-sheng",
     year: "2025",
     kind: "配樂",
     title: "短片《方死方生》",
     description: "為短片譜寫配樂。",
     clips: [
-      { label: "FSFS 1", url: "/portfolio/FSFS/FSFS_1_FINAL.mp3" },
-      { label: "FSFS 2", url: "/portfolio/FSFS/FSFS_2_FINAL.mp3" },
-      { label: "FSFS 3", url: "/portfolio/FSFS/FSFS_3_FINAL.mp3" },
+      { label: "FSFS 1", url: "/portfolio/FSFS/FSFS_1_FINAL.mp3", duration: 86 },
+      { label: "FSFS 2", url: "/portfolio/FSFS/FSFS_2_FINAL.mp3", duration: 176 },
+      { label: "FSFS 3", url: "/portfolio/FSFS/FSFS_3_FINAL.mp3", duration: 148 },
     ],
     introSections: [
       {
@@ -69,8 +123,8 @@ export const audioTracks: AudioTrack[] = [
     subtitle: "3D 橫版冒險解謎遊戲",
     description: "遊戲配樂與互動情境聲響設計。",
     clips: [
-      { label: "Moist Dream", url: "/portfolio/mossaic/Moist_Dream.mp3" },
-      { label: "Scorched Trail", url: "/portfolio/mossaic/Schorched_Trail.mp3" },
+      { label: "Moist Dream", url: "/portfolio/mossaic/Moist_Dream.mp3", duration: 144 },
+      { label: "Scorched Trail", url: "/portfolio/mossaic/Schorched_Trail.mp3", duration: 111 },
     ],
     introSections: [
       {
@@ -90,12 +144,12 @@ export const audioTracks: AudioTrack[] = [
     title: "金勇短片《A story of...》",
     description: "短片配樂。",
     clips: [
-      { label: "Cue 1", url: "/portfolio/aStoryOf/1.mp3" },
-      { label: "Cue 2", url: "/portfolio/aStoryOf/2.mp3" },
-      { label: "Cue 3", url: "/portfolio/aStoryOf/3.mp3" },
-      { label: "Cue 4", url: "/portfolio/aStoryOf/4.mp3" },
-      { label: "Cue 5", url: "/portfolio/aStoryOf/5.mp3" },
-      { label: "Ending", url: "/portfolio/aStoryOf/ending.mp3" },
+      { label: "Cue 1", url: "/portfolio/aStoryOf/1.mp3", duration: 116 },
+      { label: "Cue 2", url: "/portfolio/aStoryOf/2.mp3", duration: 107 },
+      { label: "Cue 3", url: "/portfolio/aStoryOf/3.mp3", duration: 251 },
+      { label: "Cue 4", url: "/portfolio/aStoryOf/4.mp3", duration: 259 },
+      { label: "Cue 5", url: "/portfolio/aStoryOf/5.mp3", duration: 48 },
+      { label: "Ending", url: "/portfolio/aStoryOf/ending.mp3", duration: 179 },
     ],
     introSections: [
       {
@@ -119,12 +173,12 @@ export const audioTracks: AudioTrack[] = [
     title: "短片《我的島》",
     description: "短片配樂。",
     clips: [
-      { label: "Island 1", url: "/portfolio/my_island/island_1.mp3" },
-      { label: "Island 2", url: "/portfolio/my_island/island_2.mp3" },
-      { label: "Island 3", url: "/portfolio/my_island/island_3.mp3" },
-      { label: "Island 4", url: "/portfolio/my_island/island_4.mp3" },
-      { label: "Island 5", url: "/portfolio/my_island/island_5.mp3" },
-      { label: "Island 6", url: "/portfolio/my_island/island_6.mp3" },
+      { label: "Island 1", url: "/portfolio/my_island/island_1.mp3", duration: 30 },
+      { label: "Island 2", url: "/portfolio/my_island/island_2.mp3", duration: 59 },
+      { label: "Island 3", url: "/portfolio/my_island/island_3.mp3", duration: 114 },
+      { label: "Island 4", url: "/portfolio/my_island/island_4.mp3", duration: 106 },
+      { label: "Island 5", url: "/portfolio/my_island/island_5.mp3", duration: 85 },
+      { label: "Island 6", url: "/portfolio/my_island/island_6.mp3", duration: 181 },
     ],
     introSections: [
       {
@@ -152,10 +206,10 @@ export const audioTracks: AudioTrack[] = [
     title: "短片《狗與嬰兒》",
     description: "短片配樂。",
     clips: [
-      { label: "Dog & Baby 1", url: "/portfolio/DogNBaby/dogshit_1_final.mp3" },
-      { label: "Dog & Baby 2", url: "/portfolio/DogNBaby/dogshit_2_final.mp3" },
-      { label: "Dog & Baby 3", url: "/portfolio/DogNBaby/dogshit_3_final.mp3" },
-      { label: "Dog & Baby 4", url: "/portfolio/DogNBaby/dogshit_4_final.mp3" },
+      { label: "Dog & Baby 1", url: "/portfolio/DogNBaby/dogshit_1_final.mp3", duration: 167 },
+      { label: "Dog & Baby 2", url: "/portfolio/DogNBaby/dogshit_2_final.mp3", duration: 51 },
+      { label: "Dog & Baby 3", url: "/portfolio/DogNBaby/dogshit_3_final.mp3", duration: 83 },
+      { label: "Dog & Baby 4", url: "/portfolio/DogNBaby/dogshit_4_final.mp3", duration: 143 },
     ],
     introSections: [
       {
@@ -179,7 +233,7 @@ export const audioTracks: AudioTrack[] = [
     title: "傳院影展《奇疫幻夢》展場配樂",
     description: "展場空間配樂，配合影像裝置與觀展動線。",
     clips: [
-      { label: "Illness Dream", url: "/portfolio/IllnessDream/20220414-2.mp3" },
+      { label: "Illness Dream", url: "/portfolio/IllnessDream/20220414-2.mp3", duration: 139 },
     ],
     introSections: [
       {
@@ -240,6 +294,7 @@ export const audioTracks: AudioTrack[] = [
       {
         label: "故事時間軸（音檔）",
         url: "/portfolio/utopia/utopia_StoryTimeline_V3.mp3",
+        duration: 89,
         coverImageUrl: "/portfolio/utopia/utopia.jpg",
       },
     ],
@@ -254,11 +309,24 @@ export const audioTracks: AudioTrack[] = [
       {
         label: "演出紀錄（影片）",
         url: noiseCubeVideoPath,
-        glassImageUrl: "/portfolio/noiseCube/performer.png",
+        duration: 29,
       },
     ],
   },
 ];
+
+/** 播放清單順序：置頂 → 年份新到舊；同一年維持陣列中的順序 */
+export function sortAudioTracks(tracks: AudioTrack[]): AudioTrack[] {
+  return tracks
+    .map((t, i) => ({ t, i }))
+    .sort(
+      (a, b) =>
+        Number(Boolean(b.t.pinned)) - Number(Boolean(a.t.pinned)) ||
+        Number(b.t.year) - Number(a.t.year) ||
+        a.i - b.i,
+    )
+    .map((x) => x.t);
+}
 
 export function getAudioTrack(slug: string) {
   return audioTracks.find((t) => t.slug === slug);

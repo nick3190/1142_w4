@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Noto_Sans_TC, Noto_Serif_TC } from "next/font/google";
+import { Geist } from "next/font/google";
 import { SiteNav } from "./components/SiteNav";
 import "./globals.css";
 
@@ -8,17 +8,10 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const notoSans = Noto_Sans_TC({
-  variable: "--font-noto-sans",
-  weight: ["400", "500"],
-  preload: false,
-});
-
-const notoSerif = Noto_Serif_TC({
-  variable: "--font-noto-serif",
-  weight: ["400", "700"],
-  preload: false,
-});
+// 中文字型直接走 Google Fonts CSS：CJK 字型會被切成上百個 unicode-range 子檔，
+// 交給 next/font 在 Vercel（Turbopack）上會建置失敗。
+const CJK_FONTS_HREF =
+  "https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500&family=Noto+Serif+TC:wght@400;700&display=swap";
 
 export const metadata: Metadata = {
   title: {
@@ -37,12 +30,21 @@ export default function RootLayout({
   return (
     <html
       lang="zh-Hant"
-      className={`${geistSans.variable} ${notoSans.variable} ${notoSerif.variable} h-full bg-ink antialiased`}
+      className={`${geistSans.variable} h-full bg-ink antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-ink text-paper">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link rel="stylesheet" href={CJK_FONTS_HREF} />
+      </head>
+      <body className="flex min-h-full flex-col text-paper">
         <SiteNav />
         <div className="flex-1">{children}</div>
-        <footer className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-t border-line px-5 py-6 text-xs text-mute sm:px-8 lg:px-12">
+        <footer className="relative flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-t border-line px-5 py-6 text-xs text-mute sm:px-8 lg:px-12">
           <a
             href="mailto:uniqueee3190@gmail.com"
             className="transition-colors hover:text-paper"

@@ -23,12 +23,16 @@
   --color-mute: var(--mute);
   --color-line: var(--line);
   --color-faint: var(--faint);
-  --font-sans: var(--font-geist-sans), var(--font-noto-sans), system-ui, sans-serif;
-  --font-serif: var(--font-noto-serif), "Songti TC", serif;
+  --font-sans: var(--font-geist-sans), "Noto Sans TC", "PingFang TC", system-ui, sans-serif;
+  --font-serif: "Noto Serif TC", "Songti TC", serif;
 }
 
-body {
+html {
   background: var(--ink);
+}
+
+/* body 不上底色：首頁的聲環背景放在負 z-index，body 有底色會把它蓋掉 */
+body {
   color: var(--paper);
   font-family: var(--font-sans);
   font-feature-settings: "palt" 1;
@@ -78,6 +82,57 @@ video {
   animation: veil-out 0s 1.2s forwards;
 }
 
+/* modal：粒子聚攏時面板浮現 */
+@keyframes modal-backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes modal-panel-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+    filter: blur(6px);
+  }
+}
+.modal-backdrop {
+  animation: modal-backdrop-in 0.3s ease-out both;
+}
+.modal-panel {
+  animation: modal-panel-in 0.55s 0.18s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* 播放清單展開／收合時掃過的一道聲波 */
+@keyframes wave-flash {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.15);
+  }
+  25% {
+    opacity: 0.9;
+    transform: scaleY(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleY(0.05);
+  }
+}
+@keyframes wave-travel {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.wave-flash {
+  animation: wave-flash 0.75s ease-out forwards;
+  transform-origin: center;
+}
+.wave-flash path {
+  animation: wave-travel 0.75s linear forwards;
+}
+
 /* 播放中的曲目旁那三根小音柱 */
 @keyframes eq {
   0%,
@@ -95,8 +150,13 @@ video {
 
 @media (prefers-reduced-motion: reduce) {
   .page-enter,
-  .eq-bar {
+  .eq-bar,
+  .modal-backdrop,
+  .modal-panel {
     animation: none;
+  }
+  .wave-flash {
+    display: none;
   }
   .page-veil {
     display: none;

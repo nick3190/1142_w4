@@ -1,9 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import type { AudioClip, AudioTrack } from "@/lib/portfolio-data";
+import { sortAudioTracks } from "@/lib/portfolio-data";
 import { attachAnalyser } from "@/lib/audio-graph";
-import { ParticleRing } from "../ParticleRing";
+import { VIZ_MODES, type VizMode } from "@/lib/visualizers";
+import { Visualizer } from "../Visualizer";
 
 function isVideoUrl(u: string) {
   return /\.(mov|mp4|webm|m4v|ogv)(\?.*)?$/i.test(u);
@@ -40,30 +49,101 @@ function deckMode(clip: AudioClip): DeckMode {
   return "audio";
 }
 
+function formatTime(sec: number) {
+  if (!Number.isFinite(sec) || sec < 0) return "0:00";
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+function clipsOf(work: AudioTrack): AudioClip[] {
+  return work.clips?.length ? work.clips : [{ label: `${work.title}（尚無音檔）` }];
+}
+
 type QueueEntry = {
   work: AudioTrack;
   clip: AudioClip;
 };
 
-function buildQueue(tracks: AudioTrack[]): QueueEntry[] {
+function buildQueue(works: AudioTrack[]): QueueEntry[] {
   const out: QueueEntry[] = [];
-  const score = tracks.filter((t) => t.kind === "配樂");
-  const sound = tracks.filter((t) => t.kind === "聲音設計");
-  const ordered = [...score, ...sound];
-  for (const work of ordered) {
-    if (work.clips?.length) {
-      for (const clip of work.clips) {
-        out.push({ work, clip });
-      }
-    } else {
-      out.push({
-        work,
-        clip: { label: `${work.title}（尚無音檔）` },
-      });
-    }
+  for (const work of works) {
+    for (const clip of clipsOf(work)) out.push({ work, clip });
   }
   return out;
 }
+
+/* ── 視覺模式：存在 localStorage，伺服端一律是「聲環」 ── */
+
+const VIZ_KEY = "nick-viz-mode";
+const vizListeners = new Set<() => void>();
+
+function readVizMode(): VizMode {
+  try {
+    const v = window.localStorage.getItem(VIZ_KEY);
+    if (VIZ_MODES.some((m) => m.mode === v)) return v as VizMode;
+  } catch {
+    /* 無痕模式等情況讀不到 */
+  }
+  return "ring";
+}
+
+function writeVizMode(mode: VizMode) {
+  try {
+    window.localStorage.setItem(VIZ_KEY, mode);
+  } catch {
+    /* 存不了就只在這次瀏覽有效 */
+  }
+  memoryMode = mode;
+  vizListeners.forEach((l) => l());
+}
+
+let memoryMode: VizMode | null = null;
+
+function useVizMode(): [VizMode, (m: VizMode) => void] {
+  const mode = useSyncExternalStore(
+    (cb) => {
+      vizListeners.add(cb);
+      return () => vizListeners.delete(cb);
+    },
+    () => memoryMode ?? readVizMode(),
+    () => "ring" as VizMode,
+  );
+  return [mode, writeVizMode];
+}
+
+/* ── 小元件 ── */
+
+function EqBars() {
+  return (
+    <span className="flex h-3 w-3 items-end gap-[2px]" aria-hidden>
+      <span className="eq-bar h-full w-[2px] bg-current" />
+      <span className="eq-bar h-full w-[2px] bg-current [animation-delay:-0.3s]" />
+      <span className="eq-bar h-full w-[2px] bg-current [animation-delay:-0.6s]" />
+    </span>
+  );
+}
+
+function PlayGlyph() {
+  return (
+    <svg width="9" height="10" viewBox="0 0 9 10" aria-hidden>
+      <path d="M1 0.8 L8.2 5 L1 9.2 Z" fill="currentColor" />
+    </svg>
+  );
+}
+
+const WAVE_PATH = (() => {
+  // 兩倍寬的正弦波，讓 translateX(-50%) 剛好平移一個畫面
+  const pts: string[] = [];
+  for (let x = 0; x <= 400; x += 4) {
+    const env = Math.sin(((x % 200) / 200) * Math.PI);
+    const y = 8 + Math.sin(x / 7) * 6 * env;
+    pts.push(`${x === 0 ? "M" : "L"}${x} ${y.toFixed(2)}`);
+  }
+  return pts.join(" ");
+})();
+
+/* ── 主元件 ── */
 
 type AudioWorksPlayerProps = {
   tracks: AudioTrack[];
@@ -76,7 +156,8 @@ export function AudioWorksPlayer({
   initialSlug,
   initialAutoplay = false,
 }: AudioWorksPlayerProps) {
-  const queue = useMemo(() => buildQueue(tracks), [tracks]);
+  const works = useMemo(() => sortAudioTracks(tracks), [tracks]);
+  const queue = useMemo(() => buildQueue(works), [works]);
 
   const initialFlat = useMemo(() => {
     if (!initialSlug) return 0;
@@ -88,17 +169,11 @@ export function AudioWorksPlayer({
   const [deckPlaying, setDeckPlaying] = useState(false);
   const current = queue[flatIndex] ?? queue[0];
 
-  const initialOpenSlug = queue[initialFlat]?.work.slug ?? "";
   const [openSlugs, setOpenSlugs] = useState<Record<string, boolean>>(() => {
-    const next: Record<string, boolean> = {};
-    for (const t of tracks) {
-      if (t.kind === "配樂") next[t.slug] = false;
-    }
-    if (initialOpenSlug && tracks.find((t) => t.slug === initialOpenSlug)?.kind === "配樂") {
-      next[initialOpenSlug] = true;
-    }
-    return next;
+    const slug = queue[initialFlat]?.work.slug;
+    return slug ? { [slug]: true } : {};
   });
+  const [waveTicks, setWaveTicks] = useState<Record<string, number>>({});
 
   const [autoplayTick, setAutoplayTick] = useState(0);
   const urlAutoplayBump = useRef(false);
@@ -112,9 +187,12 @@ export function AudioWorksPlayer({
   const goFlat = useCallback(
     (i: number) => {
       if (queue.length === 0) return;
-      setFlatIndex(Math.max(0, Math.min(queue.length - 1, i)));
+      const next = Math.max(0, Math.min(queue.length - 1, i));
+      setFlatIndex(next);
+      const slug = queue[next]?.work.slug;
+      if (slug) setOpenSlugs((prev) => (prev[slug] ? prev : { ...prev, [slug]: true }));
     },
-    [queue.length],
+    [queue],
   );
 
   const pickAndPlay = useCallback(
@@ -125,81 +203,61 @@ export function AudioWorksPlayer({
     [goFlat],
   );
 
-  useEffect(() => {
-    const slug = queue[flatIndex]?.work.slug;
-    if (!slug) return;
-    const kind = tracks.find((t) => t.slug === slug)?.kind;
-    if (kind !== "配樂") return;
-    setOpenSlugs((prev) => (prev[slug] ? prev : { ...prev, [slug]: true }));
-  }, [flatIndex, queue, tracks]);
-
-  const toggleWorkOpen = useCallback((slug: string) => {
+  // 展開／收合只改清單，不碰播放
+  const toggleWork = useCallback((slug: string) => {
     setOpenSlugs((prev) => ({ ...prev, [slug]: !prev[slug] }));
+    setWaveTicks((prev) => ({ ...prev, [slug]: (prev[slug] ?? 0) + 1 }));
   }, []);
 
-  const firstQueueIndexForWork = useCallback(
+  const playWork = useCallback(
     (slug: string) => {
-      const work = tracks.find((w) => w.slug === slug);
-      if (!work) return -1;
-      const clips =
-        work.clips && work.clips.length > 0
-          ? work.clips
-          : [{ label: `${work.title}（尚無音檔）` }];
-      const first = clips[0];
-      return queue.findIndex(
-        (q) => q.work.slug === slug && q.clip.label === first.label,
-      );
+      const qi = queue.findIndex((q) => q.work.slug === slug);
+      if (qi >= 0) pickAndPlay(qi);
     },
-    [queue, tracks],
+    [queue, pickAndPlay],
   );
 
-  const playWorkFirst = useCallback(
-    (slug: string) => {
-      const qi = firstQueueIndexForWork(slug);
-      if (qi < 0) return;
-      const kind = tracks.find((t) => t.slug === slug)?.kind;
-      if (kind === "配樂") {
-        setOpenSlugs((prev) => ({ ...prev, [slug]: true }));
-      }
-      pickAndPlay(qi);
-    },
-    [firstQueueIndexForWork, pickAndPlay, tracks],
-  );
-
-  const score = useMemo(() => tracks.filter((t) => t.kind === "配樂"), [tracks]);
-  const sound = useMemo(() => tracks.filter((t) => t.kind === "聲音設計"), [tracks]);
+  // 依年份分段（置頂的作品自成一段時也照樣顯示年份）
+  const yearGroups = useMemo(() => {
+    const groups: { year: string; works: AudioTrack[] }[] = [];
+    for (const w of works) {
+      const last = groups[groups.length - 1];
+      if (last && last.year === w.year) last.works.push(w);
+      else groups.push({ year: w.year, works: [w] });
+    }
+    return groups;
+  }, [works]);
 
   return (
-    <div className="grid h-full min-h-0 w-full min-w-0 grid-rows-[minmax(0,18vh)_minmax(0,1fr)_minmax(0,16vh)] gap-2 lg:grid-cols-[minmax(0,15fr)_minmax(0,45fr)_minmax(0,25fr)] lg:grid-rows-1 lg:items-stretch lg:gap-4">
-      <aside className="flex min-h-0 flex-col overflow-hidden border border-line">
-        <h2 className="shrink-0 border-b border-line px-3 py-2 text-sm text-paper">
-          播放清單
-        </h2>
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-          <PlaylistGroup
-            label="配樂"
-            works={score}
-            queue={queue}
-            flatIndex={flatIndex}
-            playing={deckPlaying}
-            expandable
-            openSlugs={openSlugs}
-            onToggleWork={toggleWorkOpen}
-            onPlayWorkFirst={playWorkFirst}
-            onPickClip={pickAndPlay}
-          />
-          <PlaylistGroup
-            label="聲音設計"
-            works={sound}
-            queue={queue}
-            flatIndex={flatIndex}
-            playing={deckPlaying}
-            expandable={false}
-            openSlugs={openSlugs}
-            onToggleWork={toggleWorkOpen}
-            onPlayWorkFirst={playWorkFirst}
-            onPickClip={pickAndPlay}
-          />
+    <div className="grid h-full min-h-0 w-full min-w-0 grid-rows-[minmax(0,20vh)_minmax(0,1fr)_minmax(0,16vh)] gap-3 lg:grid-cols-[minmax(0,17fr)_minmax(0,43fr)_minmax(0,25fr)] lg:grid-rows-1 lg:items-stretch lg:gap-6">
+      <aside className="flex min-h-0 flex-col overflow-hidden bg-gradient-to-b from-white/[0.07] via-white/[0.025] to-transparent">
+        <header className="flex shrink-0 items-baseline justify-between px-4 pt-4 pb-3">
+          <h2 className="font-serif text-base text-paper">播放清單</h2>
+          <p className="text-xs text-mute tabular-nums">{works.length} 件作品</p>
+        </header>
+        <div className="h-px shrink-0 bg-gradient-to-r from-white/30 via-white/10 to-transparent" />
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-6">
+          {yearGroups.map((group, gi) => (
+            <section key={`${group.year}-${gi}`}>
+              <p className="px-4 pt-4 pb-1 text-[11px] text-mute tabular-nums">
+                {group.year}
+              </p>
+              {group.works.map((work) => (
+                <WorkRow
+                  key={work.slug}
+                  work={work}
+                  queue={queue}
+                  flatIndex={flatIndex}
+                  playing={deckPlaying}
+                  open={Boolean(openSlugs[work.slug])}
+                  waveTick={waveTicks[work.slug] ?? 0}
+                  onToggle={toggleWork}
+                  onPlayWork={playWork}
+                  onPickClip={pickAndPlay}
+                />
+              ))}
+            </section>
+          ))}
         </div>
       </aside>
 
@@ -216,7 +274,7 @@ export function AudioWorksPlayer({
         />
       </div>
 
-      <aside className="min-h-0 min-w-0 overflow-y-auto overscroll-contain border border-line p-3 sm:p-4">
+      <aside className="min-h-0 min-w-0 overflow-y-auto overscroll-contain bg-gradient-to-b from-white/[0.06] via-white/[0.02] to-transparent p-4 sm:p-5">
         <h3 className="font-serif text-lg leading-snug text-paper">
           {current.work.title}
         </h3>
@@ -228,7 +286,7 @@ export function AudioWorksPlayer({
           <span>{current.work.year}</span>
         </p>
         {current.work.introSections?.length ? (
-          <div className="mt-4 space-y-4 border-t border-line pt-4">
+          <div className="mt-4 space-y-4 pt-4 [background:linear-gradient(to_right,rgba(255,255,255,0.25),transparent)_top/100%_1px_no-repeat]">
             {current.work.introSections.map((section) => (
               <div key={section.heading}>
                 <p className="text-xs text-paper">{section.heading}</p>
@@ -248,167 +306,151 @@ export function AudioWorksPlayer({
   );
 }
 
-function PlayingMark({ active, playing }: { active: boolean; playing: boolean }) {
-  if (active && playing) {
-    return (
-      <span className="flex h-3 w-3 shrink-0 items-end gap-[2px]" aria-hidden>
-        <span className="eq-bar h-full w-[2px] bg-current" />
-        <span className="eq-bar h-full w-[2px] bg-current [animation-delay:-0.3s]" />
-        <span className="eq-bar h-full w-[2px] bg-current [animation-delay:-0.6s]" />
-      </span>
-    );
-  }
-  return (
-    <span
-      className={`h-1 w-1 shrink-0 rounded-full ${active ? "bg-current" : "bg-line"}`}
-      aria-hidden
-    />
-  );
-}
+/* ── 播放清單的一件作品 ── */
 
-type PlaylistGroupProps = {
-  label: string;
-  works: AudioTrack[];
+type WorkRowProps = {
+  work: AudioTrack;
   queue: QueueEntry[];
   flatIndex: number;
   playing: boolean;
-  expandable: boolean;
-  openSlugs: Record<string, boolean>;
-  onToggleWork: (slug: string) => void;
-  onPlayWorkFirst: (slug: string) => void;
+  open: boolean;
+  waveTick: number;
+  onToggle: (slug: string) => void;
+  onPlayWork: (slug: string) => void;
   onPickClip: (i: number) => void;
 };
 
-function PlaylistGroup({
-  label,
-  works,
+function WorkRow({
+  work,
   queue,
   flatIndex,
   playing,
-  expandable,
-  openSlugs,
-  onToggleWork,
-  onPlayWorkFirst,
+  open,
+  waveTick,
+  onToggle,
+  onPlayWork,
   onPickClip,
-}: PlaylistGroupProps) {
-  if (works.length === 0) return null;
-  return (
-    <div className="border-b border-line py-2 last:border-b-0">
-      <p className="px-3 pb-1 text-xs text-mute">{label}</p>
-      {works.map((work) => {
-        const open = expandable ? (openSlugs[work.slug] ?? false) : true;
-        const clips = work.clips?.length
-          ? work.clips
-          : [{ label: `${work.title}（尚無音檔）` }];
+}: WorkRowProps) {
+  const clips = clipsOf(work);
+  const current = queue[flatIndex];
+  const here = current?.work.slug === work.slug;
+  const known = clips.every((c) => typeof c.duration === "number");
+  const total = clips.reduce((s, c) => s + (c.duration ?? 0), 0);
+  const isVideo = clips.every((c) => c.youtubeUrl || (c.url && isVideoUrl(c.url)));
+  const panelId = `clips-${work.slug}`;
 
-        if (!expandable) {
-          return (
-            <div key={work.slug}>
-              {clips.map((clip) => {
-                const qi = queue.findIndex(
-                  (q) =>
-                    q.work.slug === work.slug && q.clip.label === clip.label,
-                );
-                const active = qi === flatIndex;
-                const playable = Boolean(clip.url || clip.youtubeUrl);
-                return (
-                  <button
-                    key={`${work.slug}-${clip.label}-${clip.url ?? ""}-${clip.youtubeUrl ?? ""}`}
-                    type="button"
-                    disabled={qi < 0}
-                    onClick={() => onPickClip(qi)}
-                    aria-current={active ? "true" : undefined}
-                    className={`flex w-full items-center gap-2.5 px-3 py-1.5 text-left transition-colors ${
-                      active
-                        ? "bg-paper text-ink"
-                        : playable
-                          ? "text-paper hover:bg-faint"
-                          : "cursor-not-allowed text-mute"
+  return (
+    <div className="relative">
+      <span
+        className={`absolute inset-y-0 left-0 w-px bg-paper transition-opacity duration-300 ${here ? "opacity-100" : "opacity-0"}`}
+        aria-hidden
+      />
+      <div className="relative flex items-center">
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-controls={panelId}
+          onClick={() => onToggle(work.slug)}
+          className={`flex min-w-0 flex-1 items-center gap-3 py-2.5 pr-2 pl-4 text-left transition-colors ${
+            here ? "bg-gradient-to-r from-white/[0.08] to-transparent" : "hover:bg-gradient-to-r hover:from-white/[0.05] hover:to-transparent"
+          }`}
+        >
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-[13px] leading-snug text-paper">
+              {work.title}
+            </span>
+            <span className="block truncate text-[11px] leading-snug text-mute">
+              {work.subtitle ?? work.kind}
+            </span>
+          </span>
+          <span className="shrink-0 text-right text-[11px] leading-snug text-mute tabular-nums">
+            <span className="block">{clips.length} 段</span>
+            <span className="block">
+              {known && total > 0 ? formatTime(total) : isVideo ? "影片" : "—"}
+            </span>
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => onPlayWork(work.slug)}
+          aria-label={`播放 ${work.title}`}
+          className="mr-3 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/25 text-paper transition-colors hover:border-paper hover:bg-paper hover:text-ink"
+        >
+          {here && playing ? <EqBars /> : <PlayGlyph />}
+        </button>
+        {waveTick > 0 ? (
+          <svg
+            key={waveTick}
+            className="wave-flash pointer-events-none absolute inset-x-0 -bottom-2 h-4 w-full text-paper"
+            viewBox="0 0 200 16"
+            preserveAspectRatio="none"
+            aria-hidden
+          >
+            <path d={WAVE_PATH} fill="none" stroke="currentColor" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+          </svg>
+        ) : null}
+      </div>
+
+      <div
+        id={panelId}
+        className={`grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.2,0.7,0.2,1)] motion-reduce:transition-none ${
+          open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        }`}
+      >
+        <ul className="overflow-hidden" inert={!open}>
+          {clips.map((clip, i) => {
+            const qi = queue.findIndex(
+              (q) => q.work.slug === work.slug && q.clip.label === clip.label,
+            );
+            const active = qi === flatIndex;
+            const playable = Boolean(clip.url || clip.youtubeUrl);
+            return (
+              <li key={`${work.slug}-${clip.label}-${clip.url ?? ""}-${clip.youtubeUrl ?? ""}`}>
+                <button
+                  type="button"
+                  disabled={qi < 0 || !playable}
+                  onClick={() => onPickClip(qi)}
+                  aria-current={active ? "true" : undefined}
+                  className={`group relative flex w-full items-center gap-3 py-1.5 pr-3 pl-6 text-left text-xs transition-colors disabled:cursor-not-allowed ${
+                    active
+                      ? "bg-gradient-to-r from-white/[0.16] via-white/[0.05] to-transparent text-paper"
+                      : "text-mute hover:bg-gradient-to-r hover:from-white/[0.06] hover:to-transparent hover:text-paper"
+                  }`}
+                >
+                  <span
+                    className={`absolute inset-y-0 left-0 w-0.5 bg-paper ${active ? "" : "hidden"}`}
+                    aria-hidden
+                  />
+                  <span className="w-5 shrink-0 text-[11px] text-mute tabular-nums">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate">{clip.label}</span>
+                  <span className="shrink-0 text-[11px] text-mute tabular-nums">
+                    {typeof clip.duration === "number"
+                      ? formatTime(clip.duration)
+                      : clip.youtubeUrl
+                        ? "YouTube"
+                        : "—"}
+                  </span>
+                  <span
+                    className={`flex w-3 shrink-0 justify-center transition-opacity ${
+                      active ? "opacity-100" : "opacity-40 group-hover:opacity-100"
                     }`}
                   >
-                    <PlayingMark active={active} playing={playing} />
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[13px] leading-snug">
-                        {work.title}
-                      </span>
-                      <span
-                        className={`block truncate text-[11px] leading-snug ${active ? "text-ink/70" : "text-mute"}`}
-                      >
-                        {clip.label}
-                      </span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          );
-        }
-
-        return (
-          <div key={work.slug}>
-            <div className="flex w-full items-stretch">
-              <button
-                type="button"
-                aria-expanded={open}
-                aria-label={open ? `收合 ${work.title}` : `展開 ${work.title}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleWork(work.slug);
-                }}
-                className="inline-flex w-8 shrink-0 items-center justify-center text-sm text-mute transition-colors hover:text-paper"
-              >
-                {open ? "−" : "+"}
-              </button>
-              <button
-                type="button"
-                onClick={() => onPlayWorkFirst(work.slug)}
-                className="min-w-0 flex-1 truncate py-1.5 pr-3 text-left text-[13px] leading-snug text-paper transition-colors hover:text-mute"
-              >
-                {work.title}
-              </button>
-            </div>
-            {open ? (
-              <ul className="pb-1">
-                {clips.map((clip) => {
-                  const qi = queue.findIndex(
-                    (q) =>
-                      q.work.slug === work.slug && q.clip.label === clip.label,
-                  );
-                  const active = qi === flatIndex;
-                  const playable = Boolean(clip.url || clip.youtubeUrl);
-                  return (
-                    <li
-                      key={`${work.slug}-${clip.label}-${clip.url ?? ""}-${clip.youtubeUrl ?? ""}`}
-                    >
-                      <button
-                        type="button"
-                        disabled={qi < 0}
-                        onClick={() => onPickClip(qi)}
-                        aria-current={active ? "true" : undefined}
-                        className={`flex w-full items-center gap-2.5 py-1 pr-3 pl-8 text-left text-xs transition-colors ${
-                          active
-                            ? "bg-paper text-ink"
-                            : playable
-                              ? "text-mute hover:bg-faint hover:text-paper"
-                              : "cursor-not-allowed text-line"
-                        }`}
-                      >
-                        <PlayingMark active={active} playing={playing} />
-                        <span className="min-w-0 flex-1 truncate">
-                          {clip.label}
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : null}
-          </div>
-        );
-      })}
+                    {active && playing ? <EqBars /> : <PlayGlyph />}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+      <div className="mx-4 h-px bg-gradient-to-r from-white/15 via-white/5 to-transparent" />
     </div>
   );
 }
+
+/* ── 中央播放器 ── */
 
 type PlaybackDeckProps = {
   entry: QueueEntry;
@@ -430,6 +472,7 @@ function PlaybackDeck({
   onPlayingChange,
 }: PlaybackDeckProps) {
   const mode = deckMode(entry.clip);
+  const [vizMode, setVizMode] = useVizMode();
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -448,7 +491,7 @@ function PlaybackDeck({
     mode === "video" || mode === "cover-audio" || mode === "audio";
   const canPlay = mode === "youtube" || canPlayLocal;
   const canSeek = canPlayLocal && duration > 0;
-  const showsRing = mode === "audio" || mode === "cover-audio";
+  const showsViz = mode === "audio" || mode === "cover-audio";
 
   const timingMedia = (): HTMLMediaElement | null => {
     if (mode === "video") return videoRef.current;
@@ -474,7 +517,7 @@ function PlaybackDeck({
     });
   }, []);
 
-  const getSpectrum = useCallback(() => {
+  const getBins = useCallback(() => {
     const a = analyserRef.current;
     const buf = freqRef.current;
     if (!a || !buf || !playingRef.current) return null;
@@ -637,19 +680,14 @@ function PlaybackDeck({
       ? `${embedBase}${embedBase.includes("?") ? "&" : "?"}autoplay=1`
       : embedBase;
 
-  // 父層是 size container，用 cqw/cqh 讓視窗在可用空間內保持正方形／16:9
-  const squareStyle = {
-    width: "min(420px, 100cqw, 100cqh)",
-    height: "min(420px, 100cqw, 100cqh)",
-  } as const;
+  // 父層是 size container，用 cqw/cqh 讓影片維持 16:9
   const videoStyle = {
     width: "min(760px, 100cqw, calc(100cqh * 16 / 9))",
     aspectRatio: "16 / 9",
   } as const;
-  const useVideoFrame = mode === "youtube" || mode === "video";
 
   return (
-    <section className="flex h-full max-h-full w-full max-w-[min(100%,540px)] flex-col justify-between overflow-hidden border border-line bg-faint px-3 py-3 text-paper sm:px-4 sm:py-4">
+    <section className="flex h-full max-h-full w-full max-w-[min(100%,680px)] flex-col justify-between overflow-hidden text-paper">
       {mode === "cover-audio" || mode === "audio" ? (
         <audio
           ref={audioRef}
@@ -671,89 +709,99 @@ function PlaybackDeck({
         </p>
       </div>
 
-      <div className="my-3 flex min-h-[120px] flex-1 items-center justify-center [container-type:size]">
-        <div
-          className="relative shrink-0 overflow-hidden bg-ink"
-          style={useVideoFrame ? videoStyle : squareStyle}
-        >
-          {mode === "youtube" && embedSrc ? (
+      <div className="relative my-2 flex min-h-[160px] flex-1 items-center justify-center [container-type:size]">
+        {showsViz ? (
+          <div className="absolute inset-0">
+            {mode === "cover-audio" && entry.clip.coverImageUrl ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={entry.clip.coverImageUrl}
+                alt=""
+                className={`absolute top-1/2 left-1/2 aspect-square w-[min(70cqw,70cqh)] -translate-x-1/2 -translate-y-1/2 object-cover grayscale transition-opacity duration-700 [mask-image:radial-gradient(circle,black_25%,transparent_68%)] ${
+                  isPlaying ? "opacity-30" : "opacity-60"
+                }`}
+              />
+            ) : null}
+            <Visualizer
+              mode={vizMode}
+              getBins={getBins}
+              radius={0.3}
+              density={110}
+              respectReducedMotion={false}
+            />
+          </div>
+        ) : null}
+
+        {mode === "youtube" && embedSrc ? (
+          <div className="relative bg-black" style={videoStyle}>
             <iframe
               key={`${embedSrc}-${autoplayTick}`}
               title={entry.clip.label}
               src={embedSrc}
-              className="absolute inset-0 h-full w-full bg-black"
+              className="absolute inset-0 h-full w-full"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
             />
-          ) : null}
+          </div>
+        ) : null}
 
-          {mode === "video" && entry.clip.url ? (
-            <>
-              <video
-                ref={videoRef}
-                src={entry.clip.url}
-                className="absolute inset-0 h-full w-full scale-105 object-cover"
-                loop
-                playsInline
-                preload="metadata"
-                onError={() => setIsPlaying(false)}
-              />
-              {entry.clip.glassImageUrl ? (
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20 p-5">
-                  <div className="max-h-[78%] max-w-[82%] border border-white/25 bg-white/10 p-3 backdrop-blur-xl">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={entry.clip.glassImageUrl}
-                      alt=""
-                      className="max-h-48 max-w-full object-contain"
-                    />
-                  </div>
-                </div>
-              ) : null}
-            </>
-          ) : null}
-
-          {mode === "cover-audio" && entry.clip.coverImageUrl ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={entry.clip.coverImageUrl}
-              alt=""
-              className={`absolute inset-0 h-full w-full object-cover grayscale transition-opacity duration-700 ${
-                isPlaying ? "opacity-25" : "opacity-60"
-              }`}
+        {mode === "video" && entry.clip.url ? (
+          <div className="relative overflow-hidden bg-black" style={videoStyle}>
+            <video
+              ref={videoRef}
+              src={entry.clip.url}
+              className="absolute inset-0 h-full w-full object-cover"
+              loop
+              playsInline
+              preload="metadata"
+              onError={() => setIsPlaying(false)}
             />
-          ) : null}
-
-          {showsRing ? (
-            <div className="absolute inset-0">
-              <ParticleRing
-                getSpectrum={getSpectrum}
-                trail={mode === "audio"}
-                radius={0.27}
-                density={110}
-                respectReducedMotion={false}
-              />
-            </div>
-          ) : null}
-
-          {mode === "none" ? (
-            <div
-              className="flex h-full w-full items-center justify-center text-xs text-mute"
-              aria-hidden
-            >
-              無預覽
-            </div>
-          ) : null}
-          {canPlayLocal ? (
             <button
               type="button"
               onClick={() => void togglePlay()}
               className="absolute inset-0 z-[5] cursor-pointer border-0 bg-transparent p-0"
               aria-label={isPlaying ? "暫停" : "播放"}
             />
-          ) : null}
-        </div>
+          </div>
+        ) : null}
+
+        {mode === "none" ? (
+          <p className="text-xs text-mute">無預覽</p>
+        ) : null}
+
+        {showsViz ? (
+          <button
+            type="button"
+            onClick={() => void togglePlay()}
+            className="absolute inset-0 z-[5] cursor-pointer border-0 bg-transparent p-0"
+            aria-label={isPlaying ? "暫停" : "播放"}
+          />
+        ) : null}
       </div>
+
+      {showsViz ? (
+        <div
+          role="group"
+          aria-label="視覺模式"
+          className="mb-3 flex justify-center gap-5 text-xs"
+        >
+          {VIZ_MODES.map((m) => (
+            <button
+              key={m.mode}
+              type="button"
+              aria-pressed={vizMode === m.mode}
+              onClick={() => setVizMode(m.mode)}
+              className={`underline-offset-[6px] transition-colors ${
+                vizMode === m.mode
+                  ? "text-paper underline decoration-1"
+                  : "text-mute hover:text-paper"
+              }`}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
 
       <div className="space-y-3">
         {mode === "youtube" ? (
@@ -781,7 +829,7 @@ function PlaybackDeck({
                 canSeek ? "cursor-pointer" : "cursor-not-allowed opacity-50"
               }`}
             >
-              <div className="h-px w-full bg-line" />
+              <div className="h-px w-full bg-gradient-to-r from-white/10 via-white/25 to-white/10" />
               <div
                 className={`pointer-events-none absolute left-0 h-px bg-paper ${
                   barDragging ? "" : "transition-[width] duration-100"
@@ -843,11 +891,4 @@ function PlaybackDeck({
       </div>
     </section>
   );
-}
-
-function formatTime(sec: number) {
-  if (!Number.isFinite(sec) || sec < 0) return "0:00";
-  const m = Math.floor(sec / 60);
-  const s = Math.floor(sec % 60);
-  return `${m}:${s.toString().padStart(2, "0")}`;
 }

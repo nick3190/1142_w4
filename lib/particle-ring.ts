@@ -1,8 +1,8 @@
 /**
- * 粒子聲環：首頁主視覺與音樂播放器共用的渲染器。
+ * 粒子聲環：首頁主視覺與播放器「環」模式共用。
  * 每顆粒子固定一個角度與徑向偏移；半徑由（1）緩慢的低頻擺動、
  * （2）該角度對應的頻譜能量、（3）指標靠近時的擾動 推動。
- * 頻譜左右鏡像，低頻在環的頂端，高頻沉到底部。
+ * 頻譜左右鏡像，低頻在環的頂端，高頻沉到底部；整個形狀隨 rotation 旋轉。
  */
 
 const TAU = Math.PI * 2;
@@ -54,10 +54,12 @@ export type RingFrame = {
   radius: number;
   /** 秒 */
   t: number;
-  /** AnalyserNode.getByteFrequencyData 的結果；沒有聲音時為 null */
-  spectrum: Uint8Array | null;
+  /** 0–1 的平滑頻譜（低頻在前）；全為 0 代表靜止 */
+  spectrum: Float32Array | null;
   /** 0–1，平滑後的整體低頻能量 */
   level: number;
+  /** 弧度，整個環的旋轉角 */
+  rotation: number;
   /** 0–1，進場程度 */
   intro: number;
   pointer: { angle: number; strength: number } | null;
@@ -71,42 +73,40 @@ export function drawRing(
   f: RingFrame,
 ) {
   const spec = f.spectrum;
-  // 只取前半段頻譜：音樂的能量幾乎都在這裡
-  const usable = spec ? Math.floor(spec.length * 0.5) : 0;
+  const bins = spec ? spec.length : 0;
   const introE = 1 - Math.pow(1 - f.intro, 3);
   const spread = 1 + (1 - introE) * 1.4;
   const R = f.radius;
 
   ctx.fillStyle = "#fff";
   for (let i = 0; i < ring.n; i++) {
-    const th = ring.ang[i]! + f.t * ring.spd[i]!;
-    const u = (((th % TAU) + TAU) % TAU) / TAU;
-    // 以頂端為 0 的鏡像位置：0 = 頂端，1 = 底端
+    // local：決定這顆粒子讀哪一段頻譜；th：實際畫的位置（含整體旋轉）
+    const local = ring.ang[i]! + f.t * ring.spd[i]!;
+    const th = local + f.rotation;
+    const u = (((local % TAU) + TAU) % TAU) / TAU;
     // 畫布 y 軸朝下，u = 0.75 是頂端
     const d = Math.abs(u - 0.75);
     const m = Math.min(d, 1 - d) * 2;
 
-    let a: number;
-    if (spec && usable > 0) {
-      const b = Math.min(usable - 1, Math.floor(Math.pow(m, 1.7) * usable));
-      const v = spec[b]! / 255;
-      a = Math.min(1, Math.pow(v, 1.4) * 1.25);
-    } else {
-      a =
-        0.06 +
-        0.06 * Math.sin(th * 4 + f.t * 0.6) +
-        0.04 * Math.sin(th * 7 - f.t * 0.9 + 1.7);
+    let a =
+      0.06 +
+      0.06 * Math.sin(local * 4 + f.t * 0.6) +
+      0.04 * Math.sin(local * 7 - f.t * 0.9 + 1.7);
+    if (spec && bins > 0) {
+      const b = Math.min(bins - 1, Math.floor(Math.pow(m, 1.7) * bins));
+      const v = spec[b]!;
+      a = Math.max(a * (1 - f.level * 4), Math.min(1, Math.pow(v, 1.4) * 1.25));
     }
     if (f.pointer) {
-      let d = th - f.pointer.angle;
-      d = Math.atan2(Math.sin(d), Math.cos(d));
-      a += f.pointer.strength * Math.exp((-d * d) / 0.1);
+      let dd = th - f.pointer.angle;
+      dd = Math.atan2(Math.sin(dd), Math.cos(dd));
+      a += f.pointer.strength * Math.exp((-dd * dd) / 0.1);
     }
 
     const wob =
-      Math.sin(3 * th + f.t * 0.7) * 0.5 +
-      Math.sin(5 * th - f.t * 1.1) * 0.3 +
-      Math.sin(9 * th + f.t * 0.4 + 1.3) * 0.2;
+      Math.sin(3 * local + f.t * 0.7) * 0.5 +
+      Math.sin(5 * local - f.t * 1.1) * 0.3 +
+      Math.sin(9 * local + f.t * 0.4 + 1.3) * 0.2;
 
     const r =
       (R * (1 + wob * 0.035 * (1 + f.level * 2.5) + a * 0.26 + f.level * 0.05) +
