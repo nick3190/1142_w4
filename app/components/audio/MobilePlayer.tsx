@@ -204,24 +204,18 @@ function WheelList({
     updateWheel.current();
   }, [items]);
 
-  // 換曲目時把它捲到中線
+  // 只有換曲目時才把它捲到中線；展開／收合清單不動捲動位置
+  const centeredFor = useRef<number | null>(null);
   useEffect(() => {
+    if (centeredFor.current === flatIndex) return;
     const el = ref.current;
     const row = el?.querySelector<HTMLElement>('[data-current="true"]');
     if (!el || !row) return;
+    centeredFor.current = flatIndex;
     const top = row.offsetTop - el.clientHeight / 2 + row.offsetHeight / 2;
     el.scrollTo({ top, behavior: firstCenter.current ? "auto" : "smooth" });
     firstCenter.current = false;
   }, [flatIndex, items]);
-
-  const centerRow = (row: HTMLElement | null) => {
-    const el = ref.current;
-    if (!el || !row) return;
-    el.scrollTo({
-      top: row.offsetTop - el.clientHeight / 2 + row.offsetHeight / 2,
-      behavior: "smooth",
-    });
-  };
 
   return (
     <div
@@ -230,7 +224,7 @@ function WheelList({
         // 點到列以外的空白處 → 切換視覺效果
         if (!(e.target as HTMLElement).closest("button")) onCycle();
       }}
-      className={`no-scrollbar relative snap-y snap-mandatory overflow-y-auto overscroll-contain [container-type:size] [mask-image:linear-gradient(to_bottom,transparent,black_22%,black_78%,transparent)] ${className}`}
+      className={`no-scrollbar relative overflow-y-auto overscroll-contain [container-type:size] [mask-image:linear-gradient(to_bottom,transparent,black_22%,black_78%,transparent)] ${className}`}
     >
       <div className="h-[42cqh]" aria-hidden />
       {items.map((item) => {
@@ -245,16 +239,13 @@ function WheelList({
               key={item.key}
               data-wheel
               data-current={here && !openSlugs[item.work.slug] ? "true" : undefined}
-              className="relative snap-center px-5 py-1.5"
+              className="relative px-5 py-1.5"
             >
               <div className="origin-left will-change-transform">
                 <button
                   type="button"
                   aria-expanded={Boolean(openSlugs[item.work.slug])}
-                  onClick={(e) => {
-                    onToggle(item.work.slug);
-                    centerRow(e.currentTarget.closest("[data-wheel]"));
-                  }}
+                  onClick={() => onToggle(item.work.slug)}
                   className="relative inline-flex max-w-full flex-col items-start text-left"
                 >
                   <span className={`font-serif text-xl leading-tight ${here ? "text-paper" : "text-paper/85"}`}>
@@ -280,17 +271,14 @@ function WheelList({
             key={item.key}
             data-wheel
             data-current={active ? "true" : undefined}
-            className="snap-center py-1 pr-5 pl-9"
+            className="py-1 pr-5 pl-9"
           >
             <div className="origin-left will-change-transform">
               <button
                 type="button"
                 disabled={item.qi < 0 || !playable}
                 aria-current={active ? "true" : undefined}
-                onClick={(e) => {
-                  onPickClip(item.qi);
-                  centerRow(e.currentTarget.closest("[data-wheel]"));
-                }}
+                onClick={() => onPickClip(item.qi)}
                 className={`inline-flex max-w-full items-center gap-3 text-left text-sm disabled:opacity-40 ${
                   active ? "text-paper" : "text-paper/70"
                 }`}

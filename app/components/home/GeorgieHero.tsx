@@ -75,7 +75,7 @@ export function GeorgieHero({ georgiePoolPaths, finalePath }: GeorgieHeroProps) 
   }, [clicks, locked, georgiePoolPaths, finalePath]);
 
   return (
-    <div className="max-w-3xl">
+    <div className="min-w-0">
       <div className="flex items-end gap-4 sm:gap-6">
         <div className="relative h-20 w-20 shrink-0 sm:h-28 sm:w-28">
           {imageLoading ? (
@@ -98,9 +98,9 @@ export function GeorgieHero({ georgiePoolPaths, finalePath }: GeorgieHeroProps) 
             onError={() => setImageLoading(false)}
           />
         </div>
-        <h1 className="font-serif text-[clamp(2.25rem,6vw,5.25rem)] leading-[1] font-bold tracking-[-0.01em] text-paper">
-          <span className="inline-block whitespace-nowrap">Nick Hsu｜</span>
-          <span className="inline-block whitespace-nowrap">許兆豐</span>
+        {/* 字級跟著視窗寬度走，任何寬度都保持一行 */}
+        <h1 className="min-w-0 font-serif text-[clamp(1rem,6.4vw,3.5rem)] leading-[1] font-bold tracking-[-0.01em] whitespace-nowrap text-paper lg:text-[clamp(2.5rem,4.2vw,5rem)]">
+          Nick Hsu｜許兆豐
         </h1>
       </div>
       {caption ? (

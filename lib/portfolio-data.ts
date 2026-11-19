@@ -84,8 +84,8 @@ export const audioTracks: AudioTrack[] = [
     description: "專輯錄音與混音。",
     clips: [
       { label: "First Day", url: "/portfolio/mobius/first_day.mp3", duration: 282 },
-      { label: "Wandering", url: "/portfolio/mobius/wandering.mp3", duration: 204 },
       { label: "Twisted, Broken", url: "/portfolio/mobius/twisted_broken.mp3", duration: 224 },
+      { label: "Wandering", url: "/portfolio/mobius/wandering.mp3", duration: 204 },
       { label: "Outro", url: "/portfolio/mobius/outro.mp3", duration: 38 },
     ],
   },

@@ -38,10 +38,11 @@ body {
   font-feature-settings: "palt" 1;
 }
 
+/* 用 clip 而不是 hidden：hidden 會讓 body 變成捲動容器，頂部導覽列的 sticky 就失效 */
 html,
 body {
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 img,
