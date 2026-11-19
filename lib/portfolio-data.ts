@@ -18,7 +18,7 @@ export type AudioClip = {
 export const noiseCubeVideoPath = `/portfolio/noiseCube/${encodeURIComponent("聲噪立方.mov")}`;
 
 /** 統神 T 恤主視覺（含中文檔名） */
-export const wangHongTeeImagePath = `/portfolio/tShirt/${encodeURIComponent("統神T＿第二版-03-03.png")}`;
+export const wangHongTeeImagePath = "/portfolio/tShirt/wang-hong-tee.webp";
 
 export type AudioIntroSection = {
   heading: string;
@@ -375,6 +375,38 @@ export const graphicWorks: GridWork[] = [
 ];
 
 export const webWorks: GridWork[] = [
+  {
+    slug: "entity-identification",
+    year: "2026",
+    title: "《實體辨識系統》",
+    subtitle: "互動網頁",
+    summary: "偽裝成真人驗證系統的互動網頁，檢查你是不是「原生人類個體」。",
+    body: ["以真人驗證介面為外殼的互動作品：點擊螢幕開始，接受系統一步步的辨識。"],
+    accent: "violet",
+    externalUrl: "https://entity-identification.vercel.app/",
+  },
+  {
+    slug: "kotodama-bunko",
+    year: "2026",
+    title: "《言霊文庫》",
+    subtitle: "日檢學習網站",
+    summary: "JLPT 詞彙與文法知識庫，依主題與功能重新整理。",
+    body: [
+      "收錄 N5–N1 詞彙與 N3–N1 文法，不只按級數，而是依主題與功能分類；可比較易混淆的項目，並以抽符札與「祓い」測驗複習。",
+    ],
+    accent: "cyan",
+    externalUrl: "https://kotodama-bunko.vercel.app/",
+  },
+  {
+    slug: "liminal-market",
+    year: "2026",
+    title: "《無人夜市》",
+    subtitle: "互動敘事網頁｜期末專案",
+    summary: "2005 年 6 月，一趟前往無人夜市的畢業旅行。",
+    body: ["以一趟前往無人夜市的畢業旅行為題的互動敘事網頁。"],
+    accent: "amber",
+    externalUrl: "https://1142-final-project-the-liminal-market.vercel.app/",
+  },
   {
     slug: "yuan-zong-batch-commerce-platform",
     year: "2026",

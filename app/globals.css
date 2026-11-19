@@ -49,6 +49,15 @@ video {
   max-width: 100%;
 }
 
+/* 圖片與影片不能拖曳、選取，iOS 長按也不會跳出「儲存圖片」 */
+img,
+video,
+canvas {
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
 ::selection {
   background: var(--paper);
   color: var(--ink);

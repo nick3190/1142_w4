@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Visualizer } from "@/app/components/Visualizer";
 import { SectionList } from "@/app/components/home/SectionList";
+import { ContactButton } from "@/app/components/ContactButton";
 import { GeorgieHero } from "@/app/components/home/GeorgieHero";
 import { getGeorgieFinalePath, getGeorgieRandomPool } from "@/lib/georgie-images";
 import { wangHongTeeImagePath } from "@/lib/portfolio-data";
@@ -55,12 +56,7 @@ export default function Home() {
         <div className="pointer-events-none relative z-10 flex h-full flex-col justify-between px-5 py-5 sm:px-8 sm:py-7 lg:px-12 lg:py-10">
           <header className="pointer-events-auto flex items-baseline justify-between gap-4 text-sm">
             <span className="text-mute">聲音、配樂與設計</span>
-            <a
-              href="mailto:uniqueee3190@gmail.com"
-              className="text-mute transition-colors hover:text-paper"
-            >
-              uniqueee3190@gmail.com
-            </a>
+            <ContactButton />
           </header>
 
           <div className="pointer-events-auto flex items-end justify-between gap-10">

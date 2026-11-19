@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { GrainFilters } from "./components/GrainFilters";
+import { MediaGuard } from "./components/MediaGuard";
 import { SiteNav } from "./components/SiteNav";
 import "./globals.css";
 
@@ -21,6 +22,13 @@ export const metadata: Metadata = {
   },
   description:
     "許兆豐（Nick Hsu）個人履歷與作品集：配樂、聲音設計、裝置、混音、平面與網頁。",
+  // 不讓搜尋引擎收錄、建立快取或索引圖片
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: { index: false, follow: false, noimageindex: true },
+  },
 };
 
 export default function RootLayout({
@@ -44,6 +52,7 @@ export default function RootLayout({
       </head>
       <body className="flex min-h-full flex-col text-paper">
         <GrainFilters />
+        <MediaGuard />
         <SiteNav />
         <div className="flex-1">{children}</div>
         <footer className="relative flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-t border-line px-5 py-6 text-xs text-mute sm:px-8 lg:px-12">
