@@ -214,6 +214,22 @@ canvas {
   display: none;
 }
 
+/* Contact 按鈕旁的訊號燈 */
+@keyframes contact-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  80%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+.contact-ping {
+  animation: contact-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
 /* 播放中的曲目旁那三根小音柱 */
 @keyframes eq {
   0%,
@@ -236,7 +252,8 @@ canvas {
   .modal-panel,
   .modal-backdrop-late,
   .modal-panel-late,
-  .viz-swap {
+  .viz-swap,
+  .contact-ping {
     animation: none;
   }
   .wave-flash {

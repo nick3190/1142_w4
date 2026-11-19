@@ -8,6 +8,7 @@ import {
   type ContactErrors,
   type ContactInput,
 } from "@/lib/contact";
+import { emitFromRect } from "@/lib/particle-fx";
 import { useMorphModal } from "./portfolio/useMorphModal";
 
 type Status =
@@ -83,9 +84,14 @@ export function ContactButton({ className = "" }: { className?: string }) {
       <button
         type="button"
         onClick={(e) => onOpen(e.currentTarget)}
+        onPointerEnter={(e) => emitFromRect(e.currentTarget.getBoundingClientRect(), "dust")}
         aria-haspopup="dialog"
-        className={`text-sm text-mute underline-offset-[6px] transition-colors hover:text-paper hover:underline ${className}`}
+        className={`group inline-flex items-center gap-2.5 rounded-full border border-paper bg-black/40 px-5 py-2 text-sm text-paper backdrop-blur-sm transition-colors duration-300 hover:bg-paper hover:text-ink focus-visible:bg-paper focus-visible:text-ink ${className}`}
       >
+        <span className="relative flex h-2 w-2" aria-hidden>
+          <span className="contact-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-60" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-current" />
+        </span>
         Contact
       </button>
 

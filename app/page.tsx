@@ -54,7 +54,7 @@ export default function Home() {
       <section className="relative h-[100svh] min-h-[600px] overflow-hidden">
 
         <div className="pointer-events-none relative z-10 flex h-full flex-col justify-between px-5 py-5 sm:px-8 sm:py-7 lg:px-12 lg:py-10">
-          <header className="pointer-events-auto flex items-baseline justify-between gap-4 text-sm">
+          <header className="pointer-events-auto flex items-center justify-between gap-4 text-sm">
             <span className="text-mute">聲音、配樂與設計</span>
             <ContactButton />
           </header>

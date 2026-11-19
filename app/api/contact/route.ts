@@ -55,19 +55,31 @@ async function sendMail(v: ContactInput) {
     "——",
     "這封信由作品集網站的聯絡表單寄出；直接回覆即可回信給對方。",
   ].join("\n");
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      from,
-      to: [to],
-      reply_to: v.email,
-      subject: `［作品集聯絡］${v.category}｜${v.name}`,
-      text,
-    }),
-    cache: "no-store",
-  });
-  return res.ok ? { ok: true as const } : { ok: false as const, reason: "send-failed" as const };
+  let res: Response;
+  try {
+    res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from,
+        to: [to],
+        reply_to: v.email,
+        subject: `［作品集聯絡］${v.category}｜${v.name}`,
+        text,
+      }),
+      cache: "no-store",
+    });
+  } catch (err) {
+    console.error("contact: 連不到 Resend", err);
+    return { ok: false as const, reason: "send-failed" as const };
+  }
+  if (!res.ok) {
+    // 把 Resend 的原因寫進 Vercel 的執行記錄（不會回傳給訪客）
+    const detail = await res.text().catch(() => "");
+    console.error(`contact: Resend 拒絕寄送（HTTP ${res.status}）from=${from} to=${to} ${detail.slice(0, 500)}`);
+    return { ok: false as const, reason: "send-failed" as const };
+  }
+  return { ok: true as const };
 }
 
 export async function POST(req: Request) {
@@ -117,7 +129,9 @@ export async function POST(req: Request) {
 
   const sent = await sendMail(value);
   if (!sent.ok) {
-    if (sent.reason === "not-configured") console.error("contact: RESEND_API_KEY 未設定");
+    if (sent.reason === "not-configured") {
+      console.error("contact: RESEND_API_KEY 未設定（Vercel → Settings → Environment Variables，設定後要重新部署）");
+    }
     return json(
       { ok: false, error: "訊息暫時寄不出去，請改寄 uniqueee3190@gmail.com。" },
       503,
