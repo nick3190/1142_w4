@@ -65,6 +65,14 @@ export type RingFrame = {
   pointer: { angle: number; strength: number } | null;
   /** 裝置像素比 */
   scale: number;
+  /** 0–1，低頻能量與節拍包絡：讓環整體脹縮 */
+  bass?: number;
+  beat?: number;
+  /** 弧度：環面繞 x／y 軸傾斜，做出立體感 */
+  tiltX?: number;
+  tiltY?: number;
+  /** 頻譜推動半徑的倍率 */
+  gain?: number;
 };
 
 export function drawRing(
@@ -77,6 +85,14 @@ export function drawRing(
   const introE = 1 - Math.pow(1 - f.intro, 3);
   const spread = 1 + (1 - introE) * 1.4;
   const R = f.radius;
+  const gain = f.gain ?? 1;
+  const bass = f.bass ?? 0;
+  const beat = f.beat ?? 0;
+  const cX = Math.cos(f.tiltX ?? 0);
+  const sX = Math.sin(f.tiltX ?? 0);
+  const cY = Math.cos(f.tiltY ?? 0);
+  const sY = Math.sin(f.tiltY ?? 0);
+  const camera = R * 4;
 
   ctx.fillStyle = "#fff";
   for (let i = 0; i < ring.n; i++) {
@@ -109,15 +125,28 @@ export function drawRing(
       Math.sin(9 * local + f.t * 0.4 + 1.3) * 0.2;
 
     const r =
-      (R * (1 + wob * 0.035 * (1 + f.level * 2.5) + a * 0.26 + f.level * 0.05) +
-        ring.off[i]! * R * 0.085 * (1 + a * 3) +
+      (R *
+        (1 +
+          wob * 0.035 * (1 + f.level * 3) +
+          a * 0.26 * gain +
+          bass * 0.12 * gain +
+          beat * 0.1 * gain) +
+        ring.off[i]! * R * 0.085 * (1 + a * 3 * gain) +
         Math.sin(f.t * 2.3 + ring.ph[i]!) * 1.2 * f.scale) *
       spread;
 
-    const x = f.cx + Math.cos(th) * r;
-    const y = f.cy + Math.sin(th) * r;
-    const s = ring.sz[i]! * f.scale;
-    ctx.globalAlpha = Math.min(1, ring.al[i]! * introE * (0.6 + a * 1.2));
+    // 環面在 3D 中傾斜：先繞 x 軸、再繞 y 軸，最後做透視
+    const px = Math.cos(th) * r;
+    const py0 = Math.sin(th) * r;
+    const py = py0 * cX;
+    const pz0 = py0 * sX;
+    const qx = px * cY + pz0 * sY;
+    const qz = -px * sY + pz0 * cY;
+    const persp = camera / (camera + qz);
+    const x = f.cx + qx * persp;
+    const y = f.cy + py * persp;
+    const s = ring.sz[i]! * f.scale * persp;
+    ctx.globalAlpha = Math.min(1, ring.al[i]! * introE * (0.6 + a * 1.2) * (0.55 + 0.45 * persp));
     ctx.fillRect(x, y, s, s);
   }
   ctx.globalAlpha = 1;

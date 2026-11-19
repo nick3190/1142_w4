@@ -1,10 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 const DEFAULT_AVATAR = "/self_pic.png";
-const DEFAULT_CAPTION = "23 歲，創作遊走於聲響、音樂與電影之間。";
+/** 預設不顯示一句話，而是三個領域；喬治彩蛋觸發時才換成文字說明 */
+const DEFAULT_CAPTION = "";
+const ROLES = ["聲音設計", "影視配樂", "互動設計"];
 const SHOW_GEORGIE_BUTTON = false;
 
 const FINALE_CAPTION = "我要回家了，掰。";
@@ -36,10 +38,12 @@ export function GeorgieHero({ georgiePoolPaths, finalePath }: GeorgieHeroProps) 
   const [avatarSrc, setAvatarSrc] = useState(DEFAULT_AVATAR);
   const [caption, setCaption] = useState(DEFAULT_CAPTION);
   const [imageLoading, setImageLoading] = useState(true);
-
-  useEffect(() => {
+  // 換頭像時重新顯示載入中（在 render 中比對，不另跑 effect）
+  const [loadingFor, setLoadingFor] = useState(avatarSrc);
+  if (loadingFor !== avatarSrc) {
+    setLoadingFor(avatarSrc);
     setImageLoading(true);
-  }, [avatarSrc]);
+  }
 
   const onGeorgie = useCallback(() => {
     if (locked) return;
@@ -71,9 +75,9 @@ export function GeorgieHero({ georgiePoolPaths, finalePath }: GeorgieHeroProps) 
   }, [clicks, locked, georgiePoolPaths, finalePath]);
 
   return (
-    <div className="max-w-xl">
+    <div className="max-w-3xl">
       <div className="flex items-end gap-4 sm:gap-6">
-        <div className="relative h-14 w-14 shrink-0 sm:h-[4.5rem] sm:w-[4.5rem]">
+        <div className="relative h-20 w-20 shrink-0 sm:h-28 sm:w-28">
           {imageLoading ? (
             <div
               className="absolute inset-0 z-10 animate-pulse rounded-full bg-faint"
@@ -87,21 +91,27 @@ export function GeorgieHero({ georgiePoolPaths, finalePath }: GeorgieHeroProps) 
             src={avatarSrc}
             alt=""
             fill
-            sizes="72px"
+            sizes="112px"
             className="rounded-full object-cover contrast-125 grayscale"
             unoptimized
             onLoad={() => setImageLoading(false)}
             onError={() => setImageLoading(false)}
           />
         </div>
-        <h1 className="font-serif text-[clamp(2.75rem,8vw,6.5rem)] leading-[0.95] font-bold tracking-[-0.02em] text-paper">
-          許兆豐
+        <h1 className="font-serif text-[clamp(2.25rem,6vw,5.25rem)] leading-[1] font-bold tracking-[-0.01em] text-paper">
+          <span className="inline-block whitespace-nowrap">Nick Hsu｜</span>
+          <span className="inline-block whitespace-nowrap">許兆豐</span>
         </h1>
       </div>
-      <p className="mt-5 text-sm text-mute">Nick Hsu</p>
-      <p className="mt-1 text-base leading-relaxed text-paper sm:text-lg">
-        {caption}
-      </p>
+      {caption ? (
+        <p className="mt-5 text-base leading-relaxed text-paper sm:text-lg">{caption}</p>
+      ) : (
+        <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-1 text-base text-paper sm:text-lg">
+          {ROLES.map((role) => (
+            <li key={role}>{role}</li>
+          ))}
+        </ul>
+      )}
       {SHOW_GEORGIE_BUTTON ? (
         <button
           type="button"

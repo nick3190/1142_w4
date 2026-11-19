@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { emitFromRect } from "@/lib/particle-fx";
+import { useMemo } from "react";
+import { useMorphModal } from "./useMorphModal";
 import type { GridWork } from "@/lib/portfolio-data";
 import { workCoverClass } from "@/lib/portfolio-data";
 
@@ -32,48 +32,11 @@ function isLocalVideo(url: string): boolean {
 }
 
 export function DynamicVideoGallery({ works }: DynamicVideoGalleryProps) {
-  const [activeSlug, setActiveSlug] = useState<string | null>(null);
-  const panelRef = useRef<HTMLDivElement | null>(null);
-
-  // 關閉：先從面板位置炸開粒子，再移除面板
-  const close = useCallback(() => {
-    const el = panelRef.current;
-    if (el) emitFromRect(el.getBoundingClientRect(), "scatter");
-    setActiveSlug(null);
-  }, []);
-
+  const { activeSlug, open, close, panelRef, closeRef } = useMorphModal();
   const activeWork = useMemo(
     () => works.find((work) => work.slug === activeSlug) ?? null,
     [works, activeSlug],
   );
-
-  useEffect(() => {
-    if (!activeWork) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") close();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [activeWork, close]);
-
-  // 打開：粒子從四周聚攏到面板輪廓
-  useEffect(() => {
-    if (!activeSlug) return;
-    const id = requestAnimationFrame(() => {
-      const el = panelRef.current;
-      if (el) emitFromRect(el.getBoundingClientRect(), "gather");
-    });
-    return () => cancelAnimationFrame(id);
-  }, [activeSlug]);
-
-  useEffect(() => {
-    if (!activeWork) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [activeWork]);
 
   const mediaUrl = activeWork?.externalUrl ?? "";
   const youtubeEmbed = mediaUrl ? toYoutubeEmbed(mediaUrl) : null;
@@ -86,11 +49,13 @@ export function DynamicVideoGallery({ works }: DynamicVideoGalleryProps) {
           <button
             key={work.slug}
             type="button"
-            onClick={() => setActiveSlug(work.slug)}
-            className="group flex flex-col text-left"
+            onClick={(e) => open(work.slug, e.currentTarget)}
+            data-dissolving={activeSlug === work.slug ? "" : undefined}
+            aria-haspopup="dialog"
+            className="work-card group flex flex-col text-left"
           >
             <div
-              className={`relative aspect-[16/10] w-full overflow-hidden ${workCoverClass(work.accent)}`}
+              className={`work-media aspect-[16/10] w-full overflow-hidden ${workCoverClass(work.accent)}`}
             >
               <span className="absolute inset-0 flex items-center justify-center" aria-hidden>
                 <span className="flex h-12 w-12 items-center justify-center rounded-full border border-paper/60 text-paper transition-colors group-hover:bg-paper group-hover:text-ink">
@@ -118,7 +83,7 @@ export function DynamicVideoGallery({ works }: DynamicVideoGalleryProps) {
 
       {activeWork ? (
         <div
-          className="modal-backdrop fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/85 p-3 sm:items-center sm:p-6"
+          className="modal-backdrop-late fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/85 p-3 sm:items-center sm:p-6"
           role="dialog"
           aria-modal="true"
           aria-label={activeWork.title}
@@ -126,7 +91,7 @@ export function DynamicVideoGallery({ works }: DynamicVideoGalleryProps) {
         >
           <div
             ref={panelRef}
-            className="modal-panel max-h-[92vh] w-full max-w-4xl overflow-y-auto border border-line bg-ink p-5 sm:p-8"
+            className="modal-panel-late max-h-[92vh] w-full max-w-4xl overflow-y-auto border border-line bg-ink p-5 sm:p-8"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
@@ -145,6 +110,7 @@ export function DynamicVideoGallery({ works }: DynamicVideoGalleryProps) {
                 ) : null}
               </div>
               <button
+                ref={closeRef}
                 type="button"
                 onClick={close}
                 className="text-sm text-mute transition-colors hover:text-paper"

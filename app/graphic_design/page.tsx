@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { WorkBentoCard } from "../components/resume/WorkBentoCard";
+import { WorkGallery } from "../components/portfolio/WorkGallery";
 import { graphicWorks } from "@/lib/portfolio-data";
 
 export const metadata: Metadata = {
@@ -15,15 +15,7 @@ export default function GraphicDesignPage() {
             平面設計
           </h1>
         </header>
-        <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 xl:grid-cols-3">
-          {graphicWorks.map((work) => (
-            <WorkBentoCard
-              key={work.slug}
-              work={work}
-              href={`/graphic_design/${work.slug}`}
-            />
-          ))}
-        </div>
+        <WorkGallery works={graphicWorks} categoryLabel="平面設計" />
       </div>
     </main>
   );

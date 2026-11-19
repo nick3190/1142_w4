@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
+import { GrainFilters } from "./components/GrainFilters";
 import { SiteNav } from "./components/SiteNav";
 import "./globals.css";
 
@@ -15,7 +16,7 @@ const CJK_FONTS_HREF =
 
 export const metadata: Metadata = {
   title: {
-    default: "許兆豐 Nick Hsu｜聲音、配樂與設計",
+    default: "Nick Hsu｜許兆豐",
     template: "%s｜Nick Hsu",
   },
   description:
@@ -42,6 +43,7 @@ export default function RootLayout({
         <link rel="stylesheet" href={CJK_FONTS_HREF} />
       </head>
       <body className="flex min-h-full flex-col text-paper">
+        <GrainFilters />
         <SiteNav />
         <div className="flex-1">{children}</div>
         <footer className="relative flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-t border-line px-5 py-6 text-xs text-mute sm:px-8 lg:px-12">

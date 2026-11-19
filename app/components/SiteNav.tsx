@@ -17,7 +17,7 @@ export function SiteNav() {
           href="/"
           className="font-serif text-base text-paper transition-colors hover:text-mute"
         >
-          許兆豐
+          Nick Hsu｜許兆豐
         </Link>
         <nav
           aria-label="主要頁面"

@@ -20,6 +20,8 @@ type Particle = {
   tween: boolean;
   /** 聚攏時先淡入；炸開時一出現就最亮 */
   fadeIn: boolean;
+  /** 崩解重組：一路保持亮度，抵達前才淡出 */
+  hold?: boolean;
   alpha: number;
 };
 
@@ -42,22 +44,37 @@ function ensure() {
   canvas.setAttribute("aria-hidden", "true");
   Object.assign(canvas.style, {
     position: "fixed",
-    inset: "0",
-    width: "100%",
-    height: "100%",
+    left: "0",
+    top: "0",
+    width: "100vw",
+    height: "100lvh",
     pointerEvents: "none",
     zIndex: "70",
   } satisfies Partial<CSSStyleDeclaration>);
   document.body.appendChild(canvas);
   ctx = canvas.getContext("2d");
+  let lastW = 0;
+  let lastH = 0;
   const resize = () => {
     if (!canvas) return;
-    dpr = Math.min(2, window.devicePixelRatio || 1);
-    canvas.width = Math.round(window.innerWidth * dpr);
-    canvas.height = Math.round(window.innerHeight * dpr);
+    // 畫布固定為 100lvh（網址列收起時的最大高度），量它本身的尺寸
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    // 手機網址列伸縮時只差幾十像素，不必重配畫布
+    if (lastW && w === lastW && Math.abs(h - lastH) < 160) return;
+    lastW = w;
+    lastH = h;
+    const maxDpr = window.matchMedia("(pointer: coarse)").matches ? 1.5 : 2;
+    dpr = Math.min(maxDpr, window.devicePixelRatio || 1);
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
   };
   resize();
-  window.addEventListener("resize", resize);
+  let timer = 0;
+  window.addEventListener("resize", () => {
+    window.clearTimeout(timer);
+    timer = window.setTimeout(resize, 150);
+  });
 }
 
 const easeOut = (x: number) => 1 - Math.pow(1 - x, 3);
@@ -82,7 +99,14 @@ function tick(now: number) {
       const e = easeOut(k);
       x = p.sx + (p.tx - p.sx) * e;
       y = p.sy + (p.ty - p.sy) * e;
-      a = (p.fadeIn ? Math.sin(k * Math.PI) : Math.pow(1 - k, 1.5)) * p.alpha;
+      a =
+        (p.hold
+          ? k < 0.72
+            ? 1
+            : (1 - k) / 0.28
+          : p.fadeIn
+            ? Math.sin(k * Math.PI)
+            : Math.pow(1 - k, 1.5)) * p.alpha;
     } else {
       const sec = (now - p.born) / 1000;
       x = p.sx + p.vx * sec;
@@ -198,6 +222,42 @@ export function emitFromRect(
         alpha: 0.5 + Math.random() * 0.5,
       });
     }
+  }
+  kick();
+}
+
+/**
+ * 崩解重組：粒子從 from（被點的作品卡）各處散開，
+ * 沿弧線飛到 to（modal 面板）的輪廓與內部，拼出新的形狀。
+ */
+export function morphRect(from: DOMRect, to: DOMRect, count?: number) {
+  if (reduced()) return;
+  ensure();
+  const now = performance.now();
+  const n = count ?? Math.round(Math.min(900, 260 + (to.width + to.height) * 0.4));
+  for (let i = 0; i < n; i++) {
+    const sx = from.left + Math.random() * from.width;
+    const sy = from.top + Math.random() * from.height;
+    const t =
+      Math.random() < 0.7
+        ? pointOnRect(to)
+        : { x: to.left + Math.random() * to.width, y: to.top + Math.random() * to.height };
+    parts.push({
+      sx,
+      sy,
+      tx: t.x,
+      ty: t.y,
+      vx: 0,
+      vy: 0,
+      // 由卡片左上往右下依序剝落
+      born: now + ((sx - from.left) / Math.max(1, from.width) + (sy - from.top) / Math.max(1, from.height)) * 110 + Math.random() * 60,
+      life: 620 + Math.random() * 380,
+      size: 0.8 + Math.random() * 1.3,
+      tween: true,
+      fadeIn: false,
+      hold: true,
+      alpha: 0.55 + Math.random() * 0.45,
+    });
   }
   kick();
 }

@@ -32,6 +32,11 @@ export type VizFrame = {
   /** 0–1，低頻在前 */
   spec: Float32Array;
   level: number;
+  /** 0–1：低頻、中頻、高頻能量，與節拍包絡（鼓點瞬間跳高再衰減） */
+  bass: number;
+  mid: number;
+  high: number;
+  beat: number;
   rotation: number;
   /** 這一幀轉了多少（含捲動造成的） */
   dRot: number;
@@ -41,8 +46,10 @@ export type VizFrame = {
 };
 
 export type Viz = {
-  /** 播放時的基本轉速（弧度／秒） */
+  /** 播放時的基本轉速（弧度／秒）；實際轉速再乘上音樂能量 */
   playSpeed: number;
+  /** 傳給 <Visualizer>：首頁等沒有聲音的情況下用 */
+  idleTilt?: boolean;
   resize(w: number, h: number, cssArea: number, dpr: number): void;
   draw(f: VizFrame): void;
 };
@@ -60,10 +67,17 @@ function fade(ctx: CanvasRenderingContext2D, w: number, h: number, a: number) {
   ctx.globalCompositeOperation = "source-over";
 }
 
+/** 與幀率無關的指數平滑：rate 越大越快跟上 */
+function approach(cur: number, target: number, rate: number, dt: number) {
+  return cur + (target - cur) * (1 - Math.exp(-rate * dt));
+}
+
 /* ───────────── ring ───────────── */
 
 function ringViz(o: VizOptions): Viz {
   let ring: Ring = createRing(600);
+  let tiltX = 0;
+  let tiltY = 0;
   return {
     playSpeed: 0.42,
     resize(_w, _h, area) {
@@ -71,7 +85,14 @@ function ringViz(o: VizOptions): Viz {
       if (Math.abs(n - ring.n) > 60) ring = createRing(n);
     },
     draw(f) {
-      fade(f.ctx, f.w, f.h, 0.34);
+      // 傾角跟著音樂：中頻把環面往後倒，高頻讓它左右擺；沒聲音時只輕輕晃
+      const sway = Math.sin(f.t * 0.23);
+      const tx = 0.12 * sway + f.mid * 0.55 + f.beat * 0.15;
+      const ty = 0.1 * Math.sin(f.t * 0.17 + 1) + (f.high * 0.7 + f.bass * 0.2) * Math.sin(f.t * 0.6);
+      tiltX = approach(tiltX, tx, 3, f.dt);
+      tiltY = approach(tiltY, ty, 2.5, f.dt);
+
+      fade(f.ctx, f.w, f.h, 0.42);
       drawRing(f.ctx, ring, {
         cx: f.w / 2,
         cy: f.h * o.centerY,
@@ -83,6 +104,11 @@ function ringViz(o: VizOptions): Viz {
         intro: f.intro,
         pointer: f.pointer,
         scale: f.dpr,
+        bass: f.bass,
+        beat: f.beat,
+        tiltX,
+        tiltY,
+        gain: 1.9,
       });
     },
   };
@@ -145,17 +171,22 @@ function polarViz(): Viz {
       off.height = h;
       octx = off.getContext("2d");
       lastA = null;
-      // 先鋪一層很淡的雜訊，靜止時不會是一片空白
+      // 一打開就是一整圈隨機頻譜，而不是全黑
       if (octx) {
-        const { cx, cy, R, r0 } = geom();
-        octx.fillStyle = "#fff";
-        for (let i = 0; i < 2600; i++) {
-          const a = Math.random() * TAU;
-          const r = r0 + Math.random() * (R - r0);
-          octx.globalAlpha = 0.04 + Math.random() * 0.1;
-          octx.fillRect(cx + Math.cos(a) * r, cy + Math.sin(a) * r, D, D);
+        const { R } = geom();
+        const fake = new Float32Array(128);
+        const p1 = Math.random() * TAU;
+        const p2 = Math.random() * TAU;
+        const width = (3 * D) / R;
+        for (let a = 0; a < TAU; a += width) {
+          const swell = 0.55 + 0.25 * Math.sin(a * 3 + p1) + 0.2 * Math.sin(a * 7 + p2);
+          for (let b = 0; b < fake.length; b++) {
+            const fall = Math.pow(1 - b / fake.length, 1.3);
+            const band = 0.5 + 0.5 * Math.sin(b * 0.21 + a * 4 + p2);
+            fake[b] = Math.max(0, fall * swell * (0.6 + 0.45 * band) + (Math.random() - 0.5) * 0.25);
+          }
+          ray(a, fake, width);
         }
-        octx.globalAlpha = 1;
       }
     },
     draw(f) {
@@ -268,6 +299,8 @@ function cubeViz(o: VizOptions): Viz {
     }
   };
 
+  let pitch = 0.5;
+  let roll = 0;
   return {
     playSpeed: 0.38,
     resize(_w, _h, area) {
@@ -276,22 +309,26 @@ function cubeViz(o: VizOptions): Viz {
     },
     draw(f) {
       const { ctx } = f;
-      fade(ctx, f.w, f.h, 0.5);
+      fade(ctx, f.w, f.h, 0.62);
       const yaw = f.rotation;
-      const pitch = 0.5 + Math.sin(f.t * 0.3) * 0.12;
+      // 中頻把立方體往前翻、高頻讓它側傾
+      pitch = approach(pitch, 0.45 + Math.sin(f.t * 0.3) * 0.12 + f.mid * 0.7 + f.beat * 0.2, 2.5, f.dt);
+      roll = approach(roll, (f.high * 0.8 + f.bass * 0.2) * Math.sin(f.t * 0.45), 2, f.dt);
+      const cr = Math.cos(roll);
+      const sr = Math.sin(roll);
       const cy0 = Math.cos(yaw);
       const sy0 = Math.sin(yaw);
       const cp = Math.cos(pitch);
       const sp = Math.sin(pitch);
       const introE = 1 - Math.pow(1 - f.intro, 3);
-      const S = Math.min(f.w, f.h) * 0.24 * (1 + f.level * 0.08) * (0.6 + 0.4 * introE);
+      const S = Math.min(f.w, f.h) * 0.24 * (1 + f.bass * 0.3 + f.beat * 0.18) * (0.6 + 0.4 * introE);
       const cx = f.w / 2;
       const cy = f.h / 2;
       const camZ = 3.4;
       ctx.fillStyle = "#fff";
       for (let i = 0; i < n; i++) {
         const m = f.spec[bin[i]!]!;
-        const push = m * 0.16 + Math.sin(f.t * 1.7 + ph[i]!) * 0.008;
+        const push = m * 0.34 + f.beat * 0.12 + Math.sin(f.t * 1.7 + ph[i]!) * (0.008 + m * 0.05);
         let x = pos[i * 3]! + nrm[i * 3]! * push;
         let y = pos[i * 3 + 1]! + nrm[i * 3 + 1]! * push;
         let z = pos[i * 3 + 2]! + nrm[i * 3 + 2]! * push;
@@ -301,11 +338,12 @@ function cubeViz(o: VizOptions): Viz {
         // pitch（x 軸）
         const y2 = y * cp - z1 * sp;
         const z2 = y * sp + z1 * cp;
-        x = x1;
-        y = y2;
+        // roll（z 軸）
+        x = x1 * cr - y2 * sr;
+        y = x1 * sr + y2 * cr;
         z = z2;
         const persp = camZ / (camZ + z);
-        const s = f.dpr * (0.6 + m * 0.9) * persp;
+        const s = f.dpr * (0.6 + m * 1.3) * persp;
         ctx.globalAlpha = Math.min(1, (0.16 + m * 0.7) * persp * introE);
         ctx.fillRect(cx + x * S * persp, cy + y * S * persp, s, s);
       }

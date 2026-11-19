@@ -21,8 +21,9 @@ export default async function AudioPage({ searchParams }: PageProps) {
 
   return (
     <main className="flex h-[calc(100dvh-5.25rem)] flex-col overflow-hidden bg-ink lg:h-[calc(100dvh-3rem)]">
-      <div className="flex w-full min-h-0 flex-1 flex-col px-3 pt-4 pb-3 sm:px-5 lg:px-8">
-        <h1 className="shrink-0 pb-3 font-serif text-2xl text-paper sm:text-3xl">
+      <div className="flex w-full min-h-0 flex-1 flex-col lg:px-8 lg:pt-4 lg:pb-3">
+        {/* 手機版讓動畫鋪滿，標題只留給螢幕閱讀器 */}
+        <h1 className="sr-only shrink-0 pb-3 font-serif text-3xl text-paper lg:not-sr-only">
           配樂與聲音設計
         </h1>
         <div className="min-h-0 flex-1">

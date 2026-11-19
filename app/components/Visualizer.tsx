@@ -56,16 +56,26 @@ export function Visualizer({
     let dpr = 1;
     let cssW = 0;
     let cssH = 0;
+    // 觸控裝置記憶體有限：像素密度上限壓低一點
+    const maxDpr = window.matchMedia("(pointer: coarse)").matches ? 1.5 : 2;
 
     const resize = () => {
-      dpr = Math.min(2, window.devicePixelRatio || 1);
-      cssW = canvas.clientWidth;
-      cssH = canvas.clientHeight;
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      // 手機網址列伸縮只改高度幾十像素：不重配畫布，避免 iOS 在捲動時反覆配置記憶體而崩潰
+      if (cssW > 0 && w === cssW && Math.abs(h - cssH) < 160) return;
+      dpr = Math.min(maxDpr, window.devicePixelRatio || 1);
+      cssW = w;
+      cssH = h;
       canvas.width = Math.max(1, Math.round(cssW * dpr));
       canvas.height = Math.max(1, Math.round(cssH * dpr));
       viz.resize(canvas.width, canvas.height, cssW * cssH, dpr);
     };
-    const ro = new ResizeObserver(resize);
+    let resizeTimer = 0;
+    const ro = new ResizeObserver(() => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(resize, 150);
+    });
     ro.observe(canvas);
     resize();
 
@@ -97,6 +107,11 @@ export function Visualizer({
 
     const spec = new Float32Array(BINS);
     let level = 0;
+    let bass = 0;
+    let mid = 0;
+    let high = 0;
+    let bassSlow = 0;
+    let beat = 0;
     let rot = 0;
     let vel = idleSpeed;
     const start = performance.now();
@@ -126,9 +141,29 @@ export function Visualizer({
       for (let b = 0; b < 30; b++) s += spec[b]!;
       level += (s / 30 - level) * 0.15;
 
-      // 旋轉慣性：播放時加速，停止時以約兩秒的時間減速
-      const target = playing ? viz.playSpeed * (1 + level * 1.5) : idleSpeed;
+      // 頻段能量（fft 1024、44.1 kHz：每格約 43 Hz）
+      const band = (from: number, to: number) => {
+        let sum = 0;
+        for (let b = from; b < to; b++) sum += spec[b]!;
+        return sum / (to - from);
+      };
+      const k = 1 - Math.exp(-dt * 10);
+      bass += (band(1, 7) - bass) * k;
+      mid += (Math.min(1, band(7, 47) * 1.4) - mid) * k;
+      high += (Math.min(1, band(47, 186) * 2.6) - high) * k;
+      // 節拍：低頻突然高過它自己的慢速平均，就觸發一次，之後指數衰減
+      bassSlow += (bass - bassSlow) * (1 - Math.exp(-dt * 4));
+      const onset = Math.max(0, bass - bassSlow - 0.03) * 6;
+      beat = Math.max(beat * Math.exp(-dt * 5), Math.min(1, onset));
+
+      // 旋轉：低頻推轉速、高頻再加一點，鼓點時往前踢一下；停止後約兩秒減速
+      const target = playing
+        ? viz.playSpeed * (0.25 + bass * 1.1 + high * 0.6 + mid * 0.3)
+        : idleSpeed;
       vel += (target - vel) * Math.min(1, dt * (playing ? 2.2 : 0.8));
+      // 鼓點往前踢一下（依時間積分，避免連續幾幀疊加），並設上限
+      if (playing) vel += onset * viz.playSpeed * 3 * dt;
+      vel = Math.min(vel, viz.playSpeed * 1.8);
       let dRot = vel * dt;
       if (pendingScroll !== 0) {
         dRot += pendingScroll * 0.0035;
@@ -160,6 +195,10 @@ export function Visualizer({
         dt,
         spec,
         level,
+        bass,
+        mid,
+        high,
+        beat,
         rotation: rot,
         dRot: Math.max(0, dRot),
         intro: still ? 1 : Math.min(1, t / 1.6),
@@ -193,6 +232,7 @@ export function Visualizer({
 
     return () => {
       cancelAnimationFrame(raf);
+      window.clearTimeout(resizeTimer);
       ro.disconnect();
       io.disconnect();
       window.removeEventListener("pointermove", onMove);

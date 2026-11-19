@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { WorkBentoCard } from "../components/resume/WorkBentoCard";
+import { WorkGallery } from "../components/portfolio/WorkGallery";
 import { mixingWorks } from "@/lib/portfolio-data";
 
 export const metadata: Metadata = {
@@ -15,15 +15,7 @@ export default function MixingPage() {
             混音
           </h1>
         </header>
-        <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 xl:grid-cols-3">
-          {mixingWorks.map((work) => (
-            <WorkBentoCard
-              key={work.slug}
-              work={work}
-              href={`/mixing/${work.slug}`}
-            />
-          ))}
-        </div>
+        <WorkGallery works={mixingWorks} categoryLabel="混音" />
       </div>
     </main>
   );

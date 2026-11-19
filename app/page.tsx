@@ -39,7 +39,7 @@ export default function Home() {
   return (
     <main className="relative min-h-full">
       {/* 聲環固定在畫面中央當背景，捲動時跟著轉 */}
-      <div className="pointer-events-none fixed inset-0 -z-10" aria-hidden>
+      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-lvh" aria-hidden>
         <Visualizer
           mode="ring"
           interactive
