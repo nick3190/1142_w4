@@ -73,6 +73,11 @@ export type RingFrame = {
   tiltY?: number;
   /** 頻譜推動半徑的倍率 */
   gain?: number;
+  /**
+   * 已經整理好的「環形輪廓」：0–1，從頂端排到底端（左右鏡像）。
+   * 有它時就不直接讀頻譜，讓整圈 360 度都平均起伏。
+   */
+  shape?: Float32Array | null;
 };
 
 export function drawRing(
@@ -108,7 +113,14 @@ export function drawRing(
       0.06 +
       0.06 * Math.sin(local * 4 + f.t * 0.6) +
       0.04 * Math.sin(local * 7 - f.t * 0.9 + 1.7);
-    if (spec && bins > 0) {
+    if (f.shape && f.shape.length > 1) {
+      // 在相鄰兩段之間線性內插，輪廓才不會一格一格
+      const x = m * (f.shape.length - 1);
+      const i0 = Math.floor(x);
+      const i1 = Math.min(f.shape.length - 1, i0 + 1);
+      const v = f.shape[i0]! + (f.shape[i1]! - f.shape[i0]!) * (x - i0);
+      a = Math.max(a * (1 - v), v);
+    } else if (spec && bins > 0) {
       const b = Math.min(bins - 1, Math.floor(Math.pow(m, 1.7) * bins));
       const v = spec[b]!;
       a = Math.max(a * (1 - f.level * 4), Math.min(1, Math.pow(v, 1.4) * 1.25));

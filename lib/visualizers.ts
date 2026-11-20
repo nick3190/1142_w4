@@ -74,8 +74,68 @@ function approach(cur: number, target: number, rate: number, dt: number) {
 
 /* ───────────── ring ───────────── */
 
+/**
+ * 把頻譜整理成環形輪廓，讓整圈 360 度都平均起伏：
+ * 1. 以對數間距切成 N 段（約 43 Hz–8.6 kHz），低、中、高頻各佔差不多的弧長；
+ * 2. 每段除以它自己約 3 秒的平均（頻譜白化）：本來就小聲的高頻也和低頻一樣有反應，
+ *    只有「比平常大聲」的那一段會鼓起，所以是此起彼落的波動，不是整圈一起脹大；
+ * 3. 和左右鄰段平滑，避免鋸齒。
+ * 參數是用 Möbius 實際播放時擷取的 540 幀頻譜調出來的。
+ */
+const RING_BANDS = 40;
+const BAND_EDGES = (() => {
+  const lo = 1;
+  const hi = 200;
+  const edges: number[] = [];
+  for (let i = 0; i <= RING_BANDS; i++) edges.push(Math.round(lo * Math.pow(hi / lo, i / RING_BANDS)));
+  return edges;
+})();
+const WHITEN_TAU = 3; // 秒
+const WHITEN_FLOOR = 0.95; // 低於平均的 95% 視為沒有起伏
+const WHITEN_GAIN = 5;
+const WHITEN_CAP = 0.85;
+
+function ringShaper() {
+  let avg: Float32Array | null = null;
+  const raw = new Float32Array(RING_BANDS);
+  const norm = new Float32Array(RING_BANDS);
+  const shape = new Float32Array(RING_BANDS);
+  return (spec: Float32Array, dt: number): Float32Array | null => {
+    let total = 0;
+    for (let i = 0; i < RING_BANDS; i++) {
+      const a = BAND_EDGES[i]!;
+      const b = Math.max(a + 1, BAND_EDGES[i + 1]!);
+      let sum = 0;
+      for (let k = a; k < b; k++) sum += spec[k] ?? 0;
+      raw[i] = sum / (b - a);
+      total += raw[i]!;
+    }
+    total /= RING_BANDS;
+    // 幾乎沒有聲音時交回給待機的呼吸動畫，平均值也重新開始累積
+    if (total < 0.004) {
+      avg = null;
+      return null;
+    }
+    if (!avg) avg = Float32Array.from(raw, (r) => Math.max(r, 0.02));
+    const follow = 1 - Math.exp(-dt / WHITEN_TAU);
+    for (let i = 0; i < RING_BANDS; i++) {
+      avg[i] = avg[i]! + (raw[i]! - avg[i]!) * follow;
+      const w = raw[i]! / Math.max(avg[i]!, 0.02);
+      norm[i] = Math.max(0, Math.min(1, (w - WHITEN_FLOOR) * WHITEN_GAIN)) * WHITEN_CAP;
+    }
+    // 整體音量很小時（例如剛按暫停、頻譜正在退）也一起收小
+    const gate = Math.min(1, total / 0.05);
+    for (let i = 0; i < RING_BANDS; i++) {
+      const n = (norm[Math.max(0, i - 1)]! + norm[i]! * 2 + norm[Math.min(RING_BANDS - 1, i + 1)]!) / 4;
+      shape[i] = n * gate;
+    }
+    return shape;
+  };
+}
+
 function ringViz(o: VizOptions): Viz {
   let ring: Ring = createRing(600);
+  const shaper = ringShaper();
   return {
     playSpeed: 0.42,
     resize(_w, _h, area) {
@@ -99,7 +159,8 @@ function ringViz(o: VizOptions): Viz {
         scale: f.dpr,
         bass: f.bass,
         beat: f.beat,
-        gain: 1.9,
+        gain: 1.8,
+        shape: shaper(f.spec, f.dt),
       });
     },
   };
