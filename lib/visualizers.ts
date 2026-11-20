@@ -76,8 +76,6 @@ function approach(cur: number, target: number, rate: number, dt: number) {
 
 function ringViz(o: VizOptions): Viz {
   let ring: Ring = createRing(600);
-  let tiltX = 0;
-  let tiltY = 0;
   return {
     playSpeed: 0.42,
     resize(_w, _h, area) {
@@ -85,12 +83,7 @@ function ringViz(o: VizOptions): Viz {
       if (Math.abs(n - ring.n) > 60) ring = createRing(n);
     },
     draw(f) {
-      // 傾角跟著音樂：中頻把環面往後倒，高頻讓它左右擺；沒聲音時只輕輕晃
-      const sway = Math.sin(f.t * 0.23);
-      const tx = 0.12 * sway + f.mid * 0.55 + f.beat * 0.15;
-      const ty = 0.1 * Math.sin(f.t * 0.17 + 1) + (f.high * 0.7 + f.bass * 0.2) * Math.sin(f.t * 0.6);
-      tiltX = approach(tiltX, tx, 3, f.dt);
-      tiltY = approach(tiltY, ty, 2.5, f.dt);
+      // 只在正面旋轉，不做立體傾斜；轉速仍由音樂決定（見 Visualizer）
 
       fade(f.ctx, f.w, f.h, 0.42);
       drawRing(f.ctx, ring, {
@@ -106,8 +99,6 @@ function ringViz(o: VizOptions): Viz {
         scale: f.dpr,
         bass: f.bass,
         beat: f.beat,
-        tiltX,
-        tiltY,
         gain: 1.9,
       });
     },
@@ -321,7 +312,7 @@ function cubeViz(o: VizOptions): Viz {
       const cp = Math.cos(pitch);
       const sp = Math.sin(pitch);
       const introE = 1 - Math.pow(1 - f.intro, 3);
-      const S = Math.min(f.w, f.h) * 0.24 * (1 + f.bass * 0.3 + f.beat * 0.18) * (0.6 + 0.4 * introE);
+      const S = Math.min(f.w, f.h) * 0.168 * (1 + f.bass * 0.3 + f.beat * 0.18) * (0.6 + 0.4 * introE);
       const cx = f.w / 2;
       const cy = f.h / 2;
       const camZ = 3.4;
