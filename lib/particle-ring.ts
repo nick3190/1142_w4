@@ -15,6 +15,8 @@ export type Ring = {
   sz: Float32Array;
   al: Float32Array;
   spd: Float32Array;
+  /** 每顆粒子目前落後於整體旋轉的角度（弧度） */
+  lag: Float32Array;
 };
 
 function gauss() {
@@ -34,6 +36,7 @@ export function createRing(n: number): Ring {
     sz: new Float32Array(n),
     al: new Float32Array(n),
     spd: new Float32Array(n),
+    lag: new Float32Array(n),
   };
   for (let i = 0; i < n; i++) {
     ring.ang[i] = Math.random() * TAU;
@@ -78,7 +81,18 @@ export type RingFrame = {
    * 有它時就不直接讀頻譜，讓整圈 360 度都平均起伏。
    */
   shape?: Float32Array | null;
+  /** 這一幀的秒數與整體轉速（弧度／秒），用來算旋轉慣性 */
+  dt?: number;
+  spin?: number;
 };
+
+/**
+ * 旋轉慣性：粒子被推得越遠、環轉得越快，就越落後於旋轉方向，
+ * 回到環上時再慢慢追上（近似角動量守恆：往外跑的東西角速度會變慢）。
+ */
+const LAG_PER_DISP = 0.6;
+const LAG_MAX = 0.25; // 最多落後約 14°
+const LAG_RELAX = 5; // 每秒追上的速率
 
 export function drawRing(
   ctx: CanvasRenderingContext2D,
@@ -103,7 +117,6 @@ export function drawRing(
   for (let i = 0; i < ring.n; i++) {
     // local：決定這顆粒子讀哪一段頻譜；th：實際畫的位置（含整體旋轉）
     const local = ring.ang[i]! + f.t * ring.spd[i]!;
-    const th = local + f.rotation;
     const u = (((local % TAU) + TAU) % TAU) / TAU;
     // 畫布 y 軸朝下，u = 0.75 是頂端
     const d = Math.abs(u - 0.75);
@@ -126,7 +139,7 @@ export function drawRing(
       a = Math.max(a * (1 - f.level * 4), Math.min(1, Math.pow(v, 1.4) * 1.25));
     }
     if (f.pointer) {
-      let dd = th - f.pointer.angle;
+      let dd = local + f.rotation - ring.lag[i]! - f.pointer.angle;
       dd = Math.atan2(Math.sin(dd), Math.cos(dd));
       a += f.pointer.strength * Math.exp((-dd * dd) / 0.1);
     }
@@ -136,16 +149,21 @@ export function drawRing(
       Math.sin(5 * local - f.t * 1.1) * 0.3 +
       Math.sin(9 * local + f.t * 0.4 + 1.3) * 0.2;
 
+    // 被音樂推出去的量（相對於半徑）；整體幅度乘上 gain
+    const disp =
+      (a * 0.26 + bass * 0.12 + beat * 0.1) * gain +
+      Math.abs(ring.off[i]!) * 0.085 * a * 3 * gain;
     const r =
-      (R *
-        (1 +
-          wob * 0.035 * (1 + f.level * 3) +
-          a * 0.26 * gain +
-          bass * 0.12 * gain +
-          beat * 0.1 * gain) +
+      (R * (1 + wob * 0.035 * (1 + f.level * 3) + (a * 0.26 + bass * 0.12 + beat * 0.1) * gain) +
         ring.off[i]! * R * 0.085 * (1 + a * 3 * gain) +
         Math.sin(f.t * 2.3 + ring.ph[i]!) * 1.2 * f.scale) *
       spread;
+
+    if (f.dt && f.spin !== undefined) {
+      const target = Math.max(-LAG_MAX, Math.min(LAG_MAX, f.spin * LAG_PER_DISP * disp));
+      ring.lag[i] = ring.lag[i]! + (target - ring.lag[i]!) * (1 - Math.exp(-f.dt * LAG_RELAX));
+    }
+    const th = local + f.rotation - ring.lag[i]!;
 
     // 環面在 3D 中傾斜：先繞 x 軸、再繞 y 軸，最後做透視
     const px = Math.cos(th) * r;

@@ -201,6 +201,7 @@ export function Visualizer({
         beat,
         rotation: rot,
         dRot: Math.max(0, dRot),
+        spin: dt > 0 ? dRot / dt : 0,
         intro: still ? 1 : Math.min(1, t / 1.6),
         pointer: p,
         playing,

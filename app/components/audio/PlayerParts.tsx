@@ -44,7 +44,8 @@ export function Stage({ pb, videoRef, entry, vizMode, onCycle, variant, autoplay
             <Visualizer
               mode={vizMode}
               getBins={pb.getBins}
-              radius={variant === "background" ? 0.34 : 0.3}
+              // 聲環半徑：前一版（0.34／0.3）的 70%
+              radius={variant === "background" ? 0.238 : 0.21}
               centerY={variant === "background" ? 0.42 : 0.5}
               density={110}
               respectReducedMotion={false}

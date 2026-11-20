@@ -40,6 +40,8 @@ export type VizFrame = {
   rotation: number;
   /** 這一幀轉了多少（含捲動造成的） */
   dRot: number;
+  /** 目前轉速（弧度／秒） */
+  spin: number;
   intro: number;
   pointer: { angle: number; strength: number } | null;
   playing: boolean;
@@ -159,8 +161,11 @@ function ringViz(o: VizOptions): Viz {
         scale: f.dpr,
         bass: f.bass,
         beat: f.beat,
-        gain: 1.8,
+        // 起伏幅度：前一版 1.8 的 60%
+        gain: 1.08,
         shape: shaper(f.spec, f.dt),
+        dt: f.dt,
+        spin: f.spin,
       });
     },
   };
